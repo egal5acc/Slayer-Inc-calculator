@@ -4,7 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rune Calculator</title>
-    <link rel="stylesheet" href="rune-style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #a82be2;
+            border-bottom: 2px solid #a82be2;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.2em;
+            margin: 20px 0 15px 0;
+            color: #7c3aed;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-panel,
+        .rune-types-panel,
+        .results-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #b0a0ff;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            background: rgba(138, 43, 226, 0.2);
+            border-color: #a82be2;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+
+        .rune-type-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rune-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .rune-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+            border-color: #a82be2;
+        }
+
+        .rune-btn.active {
+            background: linear-gradient(135deg, #a82be2 0%, #7c3aed 100%);
+            border-color: #a82be2;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+        }
+
+        .rune-info {
+            background: rgba(138, 43, 226, 0.1);
+            border-left: 4px solid #a82be2;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .rune-info p {
+            margin: 5px 0;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .result-item span {
+            color: #b0a0ff;
+        }
+
+        .result-item strong {
+            color: #5eff3c;
+            font-size: 1.1em;
+        }
+
+        .time-result strong {
+            color: #ff9d5c;
+            font-size: 1.2em;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid rgba(138, 43, 226, 0.3);
+            margin: 20px 0;
+        }
+
+        .details-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(138, 43, 226, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .details-table tr {
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .details-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .details-table td {
+            padding: 12px;
+            font-size: 0.95em;
+        }
+
+        .details-table td:first-child {
+            color: #b0a0ff;
+            font-weight: 500;
+        }
+
+        .details-table td:last-child {
+            text-align: right;
+            color: #5eff3c;
+            font-weight: 600;
+        }
+
+        .details-table tr.highlight {
+            background: rgba(138, 43, 226, 0.2);
+            font-size: 1.05em;
+        }
+
+        .details-table tr.highlight td:last-child {
+            color: #ffd700;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .rune-types-panel {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .rune-type-selector {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -149,6 +381,145 @@
         </div>
     </div>
 
-    <script src="rune-script.js"></script>
+    <script>
+        // Rune Type Data
+        const runeTypes = {
+            starter: {
+                name: "⭐ Starter Rune",
+                description: "Die Anfänger Runes. Einfach zu farmen.",
+                color: "#5eff3c",
+                multiplier: 1
+            },
+            golden: {
+                name: "🟡 Golden Rune",
+                description: "Mittlere Runes mit besseren Stats.",
+                color: "#ffd700",
+                multiplier: 1.5
+            },
+            magma: {
+                name: "🔥 Magma Rune",
+                description: "Starke Runes mit erhöhtem Drop Rate.",
+                color: "#ff6b35",
+                multiplier: 2
+            },
+            plasma: {
+                name: "⚡ Plasma Rune",
+                description: "Sehr starke Runes mit massiven Boni.",
+                color: "#00d9ff",
+                multiplier: 3
+            },
+            snow: {
+                name: "❄️ Snow Rune",
+                description: "Endgame Runes mit extremen Multiplikatoren.",
+                color: "#87ceeb",
+                multiplier: 4
+            }
+        };
+
+        let selectedRuneType = 'starter';
+
+        function selectRuneType(type) {
+            selectedRuneType = type;
+            
+            // Update buttons
+            document.querySelectorAll('.rune-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+            
+            // Update info
+            const rune = runeTypes[type];
+            document.getElementById('runeTypeInfo').innerHTML = `
+                <strong>${rune.name}</strong><br>
+                ${rune.description}
+            `;
+            
+            calculate();
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toFixed(2);
+        }
+
+        function formatLargeNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toFixed(2);
+        }
+
+        function formatTime(minutes) {
+            if (minutes < 1) {
+                return (minutes * 60).toFixed(1) + ' Sekunden';
+            }
+            if (minutes < 60) {
+                return minutes.toFixed(1) + ' Minuten';
+            }
+            if (minutes < 1440) {
+                const hours = minutes / 60;
+                return hours.toFixed(1) + ' Stunden';
+            }
+            const days = minutes / 1440;
+            return days.toFixed(1) + ' Tage';
+        }
+
+        function calculate() {
+            // Get inputs
+            const runeLuck = parseFloat(document.getElementById('runeLuck').value) || 1;
+            const runeBulk = parseFloat(document.getElementById('runeBulk').value) || 1;
+            const clone = parseFloat(document.getElementById('clone').value) || 1;
+            const runeSpeed = parseFloat(document.getElementById('runeSpeed').value) || 1;
+            const baseDropRate = parseFloat(document.getElementById('baseDropRate').value) || 1;
+            const fillerRunes = parseFloat(document.getElementById('fillerRunes').value) || 0;
+            const targetRunes = parseFloat(document.getElementById('targetRunes').value) || 1000;
+
+            // Get rune type multiplier
+            const runeMultiplier = runeTypes[selectedRuneType].multiplier;
+
+            // Calculate: (Rune Luck × Rune Bulk) × Clone × Rune Type × Rune Speed
+            const basMultiplier = runeLuck * runeBulk;
+            const cloneMultiplier = clone;
+            const speedMultiplier = runeSpeed;
+            
+            // Filler runes reduce effectiveness
+            const fillerFactor = 1 - (fillerRunes / 100);
+            
+            // Final multiplier
+            const finalMultiplier = basMultiplier * cloneMultiplier * runeMultiplier * speedMultiplier * fillerFactor;
+
+            // Calculate runes per time unit
+            const runesPerMin = baseDropRate * finalMultiplier;
+            const runesPerHour = runesPerMin * 60;
+            const runesPerDay = runesPerHour * 24;
+
+            // Time needed
+            const timeNeededMinutes = targetRunes / runesPerMin;
+
+            // Update display
+            document.getElementById('multiplier').textContent = finalMultiplier.toFixed(2) + '×';
+            document.getElementById('runesPerMin').textContent = formatNumber(runesPerMin);
+            document.getElementById('runesPerHour').textContent = formatLargeNumber(runesPerHour);
+            document.getElementById('runesPerDay').textContent = formatLargeNumber(runesPerDay);
+            document.getElementById('timeNeeded').textContent = formatTime(timeNeededMinutes);
+
+            // Update details
+            document.getElementById('detail-base').textContent = baseDropRate.toFixed(2);
+            document.getElementById('detail-luck').textContent = runeLuck.toFixed(2);
+            document.getElementById('detail-bulk').textContent = runeBulk.toFixed(2);
+            document.getElementById('detail-clone').textContent = clone.toFixed(2);
+            document.getElementById('detail-speed').textContent = runeSpeed.toFixed(2);
+            document.getElementById('detail-filler').textContent = fillerRunes.toFixed(0) + '%';
+            document.getElementById('detail-final').textContent = finalMultiplier.toFixed(2) + '×';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            selectRuneType('starter');
+        });
+    </script>
 </body>
 </html>
