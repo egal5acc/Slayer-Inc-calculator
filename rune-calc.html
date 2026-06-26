@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rune Calculator</title>
+    <link rel="stylesheet" href="rune-style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Rune Calculator</h1>
+        
+        <div class="main-grid">
+            <!-- Input Panel -->
+            <div class="input-panel">
+                <h2>Deine Stats</h2>
+                
+                <div class="input-group">
+                    <label>Rune Luck (×)</label>
+                    <input type="number" id="runeLuck" value="1" min="1" step="0.1" oninput="calculate()">
+                </div>
+
+                <div class="input-group">
+                    <label>Rune Bulk (×)</label>
+                    <input type="number" id="runeBulk" value="1" min="1" step="0.1" oninput="calculate()">
+                </div>
+
+                <div class="input-group">
+                    <label>Clone (×)</label>
+                    <input type="number" id="clone" value="1" min="1" step="0.1" oninput="calculate()">
+                </div>
+
+                <div class="input-group">
+                    <label>Rune Speed (×)</label>
+                    <input type="number" id="runeSpeed" value="1" min="0.1" step="0.1" oninput="calculate()">
+                </div>
+
+                <div class="input-group">
+                    <label>Base Rune Drop Rate (/min)</label>
+                    <input type="number" id="baseDropRate" value="1" min="0.1" step="0.1" oninput="calculate()">
+                </div>
+
+                <div class="input-group">
+                    <label>Filler Runes (%)</label>
+                    <input type="number" id="fillerRunes" value="0" min="0" max="100" step="1" oninput="calculate()">
+                </div>
+            </div>
+
+            <!-- Rune Types Selection -->
+            <div class="rune-types-panel">
+                <h2>Rune Typ</h2>
+                
+                <div class="rune-type-selector">
+                    <button class="rune-btn active" data-type="starter" onclick="selectRuneType('starter')">
+                        ⭐ Starter
+                    </button>
+                    <button class="rune-btn" data-type="golden" onclick="selectRuneType('golden')">
+                        🟡 Golden
+                    </button>
+                    <button class="rune-btn" data-type="magma" onclick="selectRuneType('magma')">
+                        🔥 Magma
+                    </button>
+                    <button class="rune-btn" data-type="plasma" onclick="selectRuneType('plasma')">
+                        ⚡ Plasma
+                    </button>
+                    <button class="rune-btn" data-type="snow" onclick="selectRuneType('snow')">
+                        ❄️ Snow
+                    </button>
+                </div>
+
+                <div class="rune-info">
+                    <p id="runeTypeInfo">Wähle einen Rune Typ</p>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <h2>📊 Ergebnisse</h2>
+                
+                <div class="result-item">
+                    <span>Multiplikator:</span>
+                    <strong id="multiplier">1.00×</strong>
+                </div>
+
+                <div class="result-item">
+                    <span>Runes pro Minute:</span>
+                    <strong id="runesPerMin">1.00</strong>
+                </div>
+
+                <div class="result-item">
+                    <span>Runes pro Stunde:</span>
+                    <strong id="runesPerHour">60.00</strong>
+                </div>
+
+                <div class="result-item">
+                    <span>Runes pro Tag:</span>
+                    <strong id="runesPerDay">86,400.00</strong>
+                </div>
+
+                <hr>
+
+                <h3>Zeit bis zu Ziel:</h3>
+                
+                <div class="input-group">
+                    <label>Ziel Runes</label>
+                    <input type="number" id="targetRunes" value="1000" oninput="calculate()">
+                </div>
+
+                <div class="result-item time-result">
+                    <span>Benötigte Zeit:</span>
+                    <strong id="timeNeeded">-</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Table -->
+        <div class="details-section">
+            <h2>📋 Detaillierte Berechnung</h2>
+            <table class="details-table">
+                <tr>
+                    <td>Basis Droprate:</td>
+                    <td id="detail-base">1.00</td>
+                </tr>
+                <tr>
+                    <td>× Rune Luck:</td>
+                    <td id="detail-luck">1.00</td>
+                </tr>
+                <tr>
+                    <td>× Rune Bulk:</td>
+                    <td id="detail-bulk">1.00</td>
+                </tr>
+                <tr>
+                    <td>× Clone:</td>
+                    <td id="detail-clone">1.00</td>
+                </tr>
+                <tr>
+                    <td>× Rune Speed:</td>
+                    <td id="detail-speed">1.00</td>
+                </tr>
+                <tr>
+                    <td>- Filler Runes:</td>
+                    <td id="detail-filler">0%</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>= Finales Multiplikator:</strong></td>
+                    <td><strong id="detail-final">1.00×</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="rune-script.js"></script>
+</body>
+</html>
