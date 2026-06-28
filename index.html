@@ -479,57 +479,5 @@ updateCalculations();
 * {
     box-sizing: border-box;
 }
-
-body {
-    margin: 0;
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    background: #0b0f19;
-    color: #f1f5f9;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-/* TOP HORIZONTAL SCROLLABLE TRAY - FRESH NEON LOOK */
-.top-tray {
-    background: #111827;
-    border-bottom: 2px solid #1f2937;
-    padding: 18px;
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
-    white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.top-tray::-webkit-scrollbar {
-    height: 6px;
-}
-.top-tray::-webkit-scrollbar-thumb {
-    background: #374151;
-    border-radius: 10px;
-}
-
-.rune-tab {
-    padding: 14px 28px;
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 8px;
-    color: #9ca3af;
-    font-size: 15px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-block;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* Vivid Element Themes */
-.rune-tab[data-rune="starter"]:hover, .rune-tab[data-rune="starter"].active { border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.15); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-.rune-tab[data-rune="golden"]:hover, .rune-tab[data-rune="golden"].active { border-color: #eab308; color: #eab308; background: rgba(234, 179, 8, 0.15); box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
-.rune-tab[data-rune="magma"]:hover, .rune-tab[data-rune="magma"].active { border-color: #ef4444; color: #ef4444; background: rgba(239, 68, 68, 0.15); box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
-.rune-tab[data-rune="plasma"]:hover, .rune-tab[data-rune="plasma"].active { border-color: #a855f7; color: #a855f7; background: rgba(168
 </body>
 </html>
