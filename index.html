@@ -58,7 +58,7 @@ input, textarea {
     border-radius: 6px;
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s;
 }
 
 input:focus, textarea:focus {
@@ -66,7 +66,35 @@ input:focus, textarea:focus {
     border-color: #3b82f6;
 }
 
-/* TEXT */
+/* ERROR STATE FÜR INPUT */
+input.error-input {
+    border-color: #ef4444;
+    background: #1c1214;
+}
+
+/* PFEILE AUS NUMMER-INPUTS ENTFERNEN */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* LIVE STATS UNTER DEN INPUTS */
+.live-counter {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.live-counter.error-text {
+    color: #ef4444;
+}
+
+/* TEXT & CARDS */
 h2 {
     margin-top: 0;
     margin-bottom: 15px;
@@ -80,10 +108,27 @@ h2 {
     margin: 0;
     line-height: 1.4;
 }
+
+.demo-output {
+    background: #151922;
+    border: 1px solid #2a2f3a;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.demo-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2a2f3a;
+}
+.demo-row:last-child {
+    border-bottom: none;
+}
 </style>
 
 </head>
-
 <body>
 
 <div class="wrapper">
@@ -93,27 +138,126 @@ h2 {
         <h2>⚡ Rune Settings</h2>
 
         <label>⏱ Rune Speed</label>
-        <input type="number" step="0.1" value="0.1">
+        <input type="number" id="speed" step="0.01" value="0.1">
 
         <label>📦 Rune Bulk</label>
-        <input type="number" value="100">
+        <input type="number" id="bulk" value="100">
 
         <label>🍀 Rune Luck</label>
-        <input type="number" step="0.1" value="1">
+        <input type="number" id="luck" step="0.1" value="1">
 
         <label>👥 Clone</label>
-        <input type="number" value="1">
+        <input type="number" id="clones" value="1">
+        
+        <div class="live-counter" id="live-display">
+            🔓 Geöffnet: <span id="live-rolls-speed">0</span> / Sekunde
+        </div>
+
+        <label>🔢 Number Array Input</label>
+        <textarea id="arrayInput" rows="4" placeholder="1,5,10,25,100"></textarea>
 
     </div>
 
     <div class="right">
         <h2>📊 Output Panel</h2>
-        <p class="small">
-            Rune results, calculations, and future rune cards will appear here.
-        </p>
+        <p class="small">Live-Berechnung basierend auf deinen Einstellungen (formatiert mit deinen Suffixen):</p>
+        
+        <div class="demo-output">
+            <div class="demo-row">
+                <span>Rollen pro Sekunde (gesamt):</span>
+                <strong id="out-rolls">0</strong>
+            </div>
+            <div class="demo-row">
+                <span>Gesamt-Multiplikator:</span>
+                <strong id="out-mult">0</strong>
+            </div>
+            <div class="demo-row">
+                <span>Beispiel für eine riesige Zahl (1.25 Qa):</span>
+                <strong id="out-example">0</strong>
+            </div>
+        </div>
     </div>
 
 </div>
+
+<script>
+// Suffix-Liste für Idle-Zahlen
+const suffixes = [
+    "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
+    "Dc", "Ud", "Dd", "Td", "Qua", "Qui", "Sxd", "Spd", "Ocd", "Nd", 
+    "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Sxvg", "Spvg", "Ocvg", "Novg", 
+    "Tr", "Utg", "Dtg", "Tt", "Qatg", "Qitg", "Sxtg", "Sptg", "Octg", "Notg"
+];
+
+function formatNumber(num) {
+    if (num === 0) return "0";
+    if (!isFinite(num)) return "∞";
+    if (num < 1000) return num.toFixed(1).replace('.0', '');
+
+    const i = Math.floor(Math.log10(num) / 3);
+    
+    if (i >= suffixes.length) {
+        return num.toExponential(2);
+    }
+
+    const formatted = (num / Math.pow(10, i * 3)).toFixed(2);
+    return formatted.replace('.00', '') + " " + suffixes[i];
+}
+
+// HTML-Elemente holen
+const inputSpeed = document.getElementById('speed');
+const inputBulk = document.getElementById('bulk');
+const inputLuck = document.getElementById('luck');
+const inputClones = document.getElementById('clones');
+
+const liveDisplay = document.getElementById('live-display');
+const liveRollsSpeed = document.getElementById('live-rolls-speed');
+const outRolls = document.getElementById('out-rolls');
+const outMult = document.getElementById('out-mult');
+const outExample = document.getElementById('out-example');
+
+function updateCalculations() {
+    const speed = parseFloat(inputSpeed.value) || 0;
+    const bulk = parseFloat(inputBulk.value) || 0;
+    const luck = parseFloat(inputLuck.value) || 0;
+    const clones = parseFloat(inputClones.value) || 0;
+
+    // VALIDIERUNG: Alles unter 0.08 wirft einen Fehler aus
+    if (speed < 0.08) {
+        inputSpeed.classList.add('error-input');
+        liveDisplay.classList.add('error-text');
+        liveDisplay.innerHTML = "❌ Error: Speed darf nicht unter 0.08 sein!";
+        
+        outRolls.textContent = "Error";
+        outMult.textContent = "Error";
+        return;
+    } else {
+        // Normalzustand wiederherstellen
+        inputSpeed.classList.remove('error-input');
+        liveDisplay.classList.remove('error-text');
+    }
+
+    // Richtige Idle-Berechnung: (1 / Speed) * Bulk * Clones
+    const rollsPerSecond = (1 / speed) * bulk * clones;
+    const totalMultiplier = luck * clones * bulk;
+
+    const formattedRolls = formatNumber(rollsPerSecond);
+    
+    // UI Updates
+    liveDisplay.innerHTML = `🔓 Geöffnet: <span>${formattedRolls}</span> / Sekunde`;
+    outRolls.textContent = formattedRolls;
+    outMult.textContent = formatNumber(totalMultiplier);
+    outExample.textContent = formatNumber(1250000000000000); 
+}
+
+// Event-Listener aktivieren
+[inputSpeed, inputBulk, inputLuck, inputClones].forEach(input => {
+    input.addEventListener('input', updateCalculations);
+});
+
+// Initialer Aufruf beim Start
+updateCalculations();
+</script>
 
 </body>
 </html>
