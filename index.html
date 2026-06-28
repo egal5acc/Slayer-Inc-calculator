@@ -138,7 +138,7 @@ h2 {
         <h2>⚡ Rune Settings</h2>
 
         <label>⏱ Rune Speed</label>
-        <input type="number" id="speed" step="0.01" value="0.1">
+        <input type="number" id="speed" step="0.01" value="0.1" min="0.08" max="1">
 
         <label>📦 Rune Bulk</label>
         <input type="number" id="bulk" value="100">
@@ -222,42 +222,23 @@ function updateCalculations() {
     const luck = parseFloat(inputLuck.value) || 0;
     const clones = parseFloat(inputClones.value) || 0;
 
-    // VALIDIERUNG: Alles unter 0.08 wirft einen Fehler aus
+    // VALIDIERUNG: Check auf Min (0.08) und Max (1)
     if (speed < 0.08) {
         inputSpeed.classList.add('error-input');
         liveDisplay.classList.add('error-text');
-        liveDisplay.innerHTML = "❌ Error: Speed darf nicht unter 0.08 sein!";
+        liveDisplay.innerHTML = "❌ Error: Min. Speed ist 0.08!";
+        
+        outRolls.textContent = "Error";
+        outMult.textContent = "Error";
+        return;
+    } else if (speed > 1) {
+        inputSpeed.classList.add('error-input');
+        liveDisplay.classList.add('error-text');
+        liveDisplay.innerHTML = "❌ Error: Max. Speed ist 1!";
         
         outRolls.textContent = "Error";
         outMult.textContent = "Error";
         return;
     } else {
-        // Normalzustand wiederherstellen
-        inputSpeed.classList.remove('error-input');
-        liveDisplay.classList.remove('error-text');
-    }
-
-    // Richtige Idle-Berechnung: (1 / Speed) * Bulk * Clones
-    const rollsPerSecond = (1 / speed) * bulk * clones;
-    const totalMultiplier = luck * clones * bulk;
-
-    const formattedRolls = formatNumber(rollsPerSecond);
-    
-    // UI Updates
-    liveDisplay.innerHTML = `🔓 Geöffnet: <span>${formattedRolls}</span> / Sekunde`;
-    outRolls.textContent = formattedRolls;
-    outMult.textContent = formatNumber(totalMultiplier);
-    outExample.textContent = formatNumber(1250000000000000); 
-}
-
-// Event-Listener aktivieren
-[inputSpeed, inputBulk, inputLuck, inputClones].forEach(input => {
-    input.addEventListener('input', updateCalculations);
-});
-
-// Initialer Aufruf beim Start
-updateCalculations();
-</script>
-
-</body>
-</html>
+        // Alles im grünen Bereich
+        inputSpeed.classList.
