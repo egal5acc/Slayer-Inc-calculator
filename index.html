@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Slayer Inc Rune Calculator</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f1115;
+    color: #e6e6e6;
+}
+
+header {
+    padding: 20px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    background: #151922;
+    border-bottom: 1px solid #2a2f3a;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.panel {
+    background: #151922;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #2a2f3a;
+}
+
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+input {
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #0f1115;
+    color: white;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tab {
+    padding: 8px 12px;
+    background: #0f1115;
+    border: 1px solid #2a2f3a;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: #2a2f3a;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.card {
+    background: #0f1115;
+    border: 1px solid #2a2f3a;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.rarity {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.common { color: #4caf50; }
+.rare { color: #2196f3; }
+.epic { color: #9c27b0; }
+.legendary { color: #ff9800; }
+
+.small {
+    font-size: 12px;
+    opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<header>Slayer Inc Rune Calculator</header>
+
+<div class="container">
+
+<!-- Inputs -->
+<div class="panel">
+    <div class="inputs">
+        <input id="speed" type="number" placeholder="Rune Speed (sec)" value="0.1">
+        <input id="bulk" type="number" placeholder="Rune Bulk" value="100">
+        <input id="luck" type="number" placeholder="Rune Luck" value="1">
+        <input id="clone" type="number" placeholder="Clone" value="1">
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="panel">
+    <div class="tabs">
+        <div class="tab active" onclick="setTab('starter')">Starter</div>
+    </div>
+
+    <div id="cards" class="cards"></div>
+</div>
+
+</div>
+
+<script>
+// ===== DATA =====
+const DATA = {
+    starter: [
+        { name: "Common Power", chance: 1/100, need: 50, type: "common" },
+        { name: "Rare XP", chance: 1/500, need: 120, type: "rare" },
+        { name: "Epic Essence", chance: 1/2000, need: 300, type: "epic" },
+        { name: "Legendary Power", chance: 1/60000, need: 800, type: "legendary" }
+    ]
+};
+
+let currentTab = "starter";
+
+// ===== UTILS =====
+function formatTime(sec) {
+    if (sec < 60) return sec.toFixed(1) + "s";
+    if (sec < 3600) return (sec/60).toFixed(1) + "m";
+    if (sec < 86400) return (sec/3600).toFixed(1) + "h";
+    return (sec/86400).toFixed(1) + "d";
+}
+
+// ===== CALC =====
+function calc(item) {
+    const speed = parseFloat(document.getElementById("speed").value);
+    const bulk = parseFloat(document.getElementById("bulk").value);
+    const luck = parseFloat(document.getElementById("luck").value);
+    const clone = parseFloat(document.getElementById("clone").value);
+
+    const rollsPerSec = 1 / speed;
+    const runsPerSec = rollsPerSec * bulk * clone;
+
+    const adjustedChance = item.chance * luck;
+    const expectedPerSec = runsPerSec * adjustedChance;
+
+    const time = expectedPerSec > 0 ? (item.need / expectedPerSec) : Infinity;
+
+    return {
+        rollsPerSec,
+        runsPerSec,
+        adjustedChance,
+        expectedPerSec,
+        time
+    };
+}
+
+// ===== RENDER =====
+function render() {
+    const container = document.getElementById("cards");
+    container.innerHTML = "";
+
+    DATA[currentTab].forEach(item => {
+        const c = calc(item);
+
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <div class="rarity ${item.type}">${item.name}</div>
+            <div class="small">Chance: 1 / ${(1/item.chance).toFixed(0)}</div>
+            <div>Need: ${item.need}</div>
+            <br>
+            <div class="small">Rolls/sec: ${c.rollsPerSec.toFixed(2)}</div>
+            <div class="small">Runs/sec: ${c.runsPerSec.toFixed(2)}</div>
+            <div class="small">Expected/sec: ${c.expectedPerSec.toFixed(4)}</div>
+            <br>
+            <b>Time: ${formatTime(c.time)}</b>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+// ===== TABS =====
+function setTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+    render();
+}
+
+// ===== LIVE UPDATE =====
+document.querySelectorAll("input").forEach(i => {
+    i.addEventListener("input", render);
+});
+
+render();
+</script>
+
+</body>
+</html>
