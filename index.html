@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Rune System</title>
+<title>Rune System Simulator</title>
 
 <style>
-/* GLOBAL BOX MODEL FIX */
 * {
     box-sizing: border-box;
 }
@@ -15,16 +14,62 @@ body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: #0f1115;
     color: #e2e8f0;
-}
-
-/* MAIN LAYOUT */
-.wrapper {
-    display: flex;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* LEFT PANEL */
-.left {
+/* TOP HORIZONTAL SCROLLABLE TRAY */
+.top-tray {
+    background: #151922;
+    border-bottom: 1px solid #2a2f3a;
+    padding: 15px;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for top tray */
+.top-tray::-webkit-scrollbar {
+    height: 6px;
+}
+.top-tray::-webkit-scrollbar-thumb {
+    background: #2a2f3a;
+    border-radius: 3px;
+}
+
+.rune-tab {
+    padding: 12px 24px;
+    background: #0f1115;
+    border: 2px solid #2a2f3a;
+    border-radius: 6px;
+    color: #94a3b8;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+/* Dynamic colors based on your screenshots */
+.rune-tab[data-rune="starter"]:hover, .rune-tab[data-rune="starter"].active { border-color: #3b82f6; color: #3b82f6; background: #111a2e; }
+.rune-tab[data-rune="golden"]:hover, .rune-tab[data-rune="golden"].active { border-color: #eab308; color: #eab308; background: #232215; }
+.rune-tab[data-rune="magma"]:hover, .rune-tab[data-rune="magma"].active { border-color: #ef4444; color: #ef4444; background: #241417; }
+.rune-tab[data-rune="plasma"]:hover, .rune-tab[data-rune="plasma"].active { border-color: #06b6d4; color: #06b6d4; background: #0f232a; }
+.rune-tab[data-rune="snow"]:hover, .rune-tab[data-rune="snow"].active { border-color: #93c5fd; color: #93c5fd; background: #172033; }
+
+/* BOTTOM SPLIT LAYOUT */
+.main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* LEFT SIDEBAR */
+.left-panel {
     width: 340px;
     background: #151922;
     padding: 20px;
@@ -32,14 +77,15 @@ body {
     overflow-y: auto;
 }
 
-/* RIGHT PANEL */
-.right {
+/* RIGHT CONTENT FIELD */
+.right-panel {
     flex: 1;
     padding: 25px;
     overflow-y: auto;
+    background: #0b0c10;
 }
 
-/* INPUTS & LABELS */
+/* LABELS & INPUT GROUPS */
 label {
     display: block;
     margin-top: 16px;
@@ -48,7 +94,6 @@ label {
     color: #94a3b8;
 }
 
-/* Flexbox Row for Input + Dropdown */
 .input-group {
     display: flex;
     gap: 8px;
@@ -66,26 +111,12 @@ input, select {
     transition: border-color 0.2s;
 }
 
-input {
-    flex: 1; /* Eingabefeld nimmt den restlichen Platz */
-}
+input { flex: 1; }
+select { width: 90px; cursor: pointer; }
+input:focus, select:focus { outline: none; border-color: #3b82f6; }
+input.error-input { border-color: #ef4444; background: #1c1214; }
 
-select {
-    width: 90px; /* Feste Breite für das Suffix-Dropdown */
-    cursor: pointer;
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-input.error-input {
-    border-color: #ef4444;
-    background: #1c1214;
-}
-
-/* LIVE STATS DIRECTLY UNDER CLONE */
+/* LIVE COUNTER DISPLAY */
 .live-counter {
     margin-top: 24px;
     padding-top: 16px;
@@ -94,60 +125,129 @@ input.error-input {
     color: #3b82f6;
     font-weight: 700;
 }
-
-.live-counter.error-text {
-    color: #ef4444;
-    font-size: 14px;
-}
-
 .live-counter span {
     color: #ffffff;
     font-family: 'Courier New', monospace;
     font-size: 22px;
 }
+.live-counter.error-text { color: #ef4444; font-size: 14px; }
 
-/* TEXT */
-h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-weight: 600;
-    color: #ffffff;
+/* RUNE CARDS GRID */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
 }
 
-.small {
-    font-size: 12px;
+/* THE RUNE CARD DESIGN (Matches Winterswrath layout) */
+.rune-card {
+    background: #11141d;
+    border: 1px solid #2a2f3a;
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.card-world-type {
+    font-size: 11px;
+    text-transform: uppercase;
     color: #64748b;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 4px 0;
+}
+
+.card-chance {
+    font-size: 13px;
+    color: #a8a29e;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 12px;
+}
+
+.card-divider {
+    border-top: 1px dashed #2a2f3a;
+    margin: 10px 0;
+}
+
+.card-avg-box {
+    margin: 12px 0;
+}
+.card-avg-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: bold;
+}
+.card-avg-time {
+    font-size: 15px;
+    color: #ef4444;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.card-stats-list {
     margin: 0;
-    line-height: 1.4;
+    padding: 0;
+    list-style: none;
+}
+.card-stats-list li {
+    font-size: 13px;
+    color: #e2e8f0;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.card-stats-list li::before {
+    content: "◆";
+    color: #3b82f6;
+    font-size: 10px;
 }
 </style>
-
 </head>
 <body>
 
-<div class="wrapper">
+<div class="top-tray">
+    <div class="rune-tab active" data-rune="starter">Starter Rune</div>
+    <div class="rune-tab" data-rune="golden">Golden Rune</div>
+    <div class="rune-tab" data-rune="magma">Magma Rune</div>
+    <div class="rune-tab" data-rune="plasma">Plasma Rune</div>
+    <div class="rune-tab" data-rune="snow">Snow Rune</div>
+</div>
 
-    <div class="left">
-
+<div class="main-container">
+    
+    <div class="left-panel">
         <h2>⚡ Rune Settings</h2>
 
         <label>⏱ Rune Speed</label>
         <div class="input-group">
-            <input type="text" id="speed" value="0.1">
+            <input type="text" id="speed" value="1">
         </div>
 
         <label>📦 Rune Bulk</label>
         <div class="input-group">
             <input type="text" id="bulk-val" value="100">
-            <select id="bulk-suffix">
-                </select>
+            <select id="bulk-suffix"></select>
         </div>
 
         <label>🍀 Rune Luck</label>
         <div class="input-group">
             <input type="text" id="luck-val" value="1">
-            <select id="luck-suffix">
-                </select>
+            <select id="luck-suffix"></select>
         </div>
 
         <label>👥 Clone</label>
@@ -158,18 +258,16 @@ h2 {
         <div class="live-counter" id="live-display">
             🔓 Opened: <span id="live-rolls-speed">0</span> / sec
         </div>
-
     </div>
 
-    <div class="right">
-        <h2>📊 Rune Cards Area</h2>
-        <p class="small">Your future rune cards, upgrades, and progression metrics will render here.</p>
+    <div class="right-panel">
+        <h2 id="current-world-title">Starter Runes Listing</h2>
+        <div class="cards-grid" id="cards-container"></div>
     </div>
 
 </div>
 
 <script>
-// Deine exakte Suffix-Liste
 const suffixes = [
     "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
     "Dc", "Ud", "Dd", "Td", "Qua", "Qui", "Sxd", "Spd", "Ocd", "Nd", 
@@ -177,95 +275,191 @@ const suffixes = [
     "Tr", "Utg", "Dtg", "Tt", "Qatg", "Qitg", "Sxtg", "Sptg", "Octg", "Notg"
 ];
 
-// Dropdowns beim Start automatisch mit den Suffixen füllen
+// DATA BASE FROM THE EXCEL SHEETS
+const runeData = {
+    starter: [
+        { name: "Common", chance: 1.21, req: 364, stats: ["Power: 10"] },
+        { name: "Uncommon", chance: 6.06, req: 313, stats: ["Power: 25", "Player XP: 5"] },
+        { name: "Rare", chance: 100.20, req: 625, stats: ["Essence: 125"] },
+        { name: "Epic", chance: 1250, req: 250, stats: ["Power: 300", "Gold Gain: +1.25"] },
+        { name: "Legendary", chance: 60110, req: 78, stats: ["Power: +1.25K", "Player XP: 15", "Rune Bulk: x1.5"] },
+        { name: "Mythical", chance: 606100, req: 10000, stats: ["Power: +100K", "Gold Gain: x4", "Rune Luck: x2.25"] },
+        { name: "Secret", chance: 2594000, req: 34, stats: ["Power: x10", "Rune Clone: x2"] },
+        { name: "Unknown", chance: 10010000000, req: 232, stats: ["Damage: x10", "Essence: x100", "Rune Luck: x2.25"] },
+        { name: "Celestial", chance: 400.7 * Math.pow(10, 21), req: 1500, stats: ["Player XP: x10", "Gold Gain: x12", "Rune Bulk: x5"] },
+        { name: "Ancient", chance: 40.07 * Math.pow(10, 36), req: 6560, stats: ["Plasma Points: x10", "Spirit Orbs: x75", "Rune Luck: x3"] }
+    ],
+    golden: [
+        { name: "Shiny", chance: 1, req: 5720, stats: ["Gold Gain: 8", "Player XP: 10"] },
+        { name: "Regal", chance: 100000, req: 186, stats: ["Gold Gain: 25"] },
+        { name: "Auric", chance: 2000000, req: 12900, stats: ["Damage: 25", "Essence: 20", "Rune Luck: x2.5"] },
+        { name: "Imperial", chance: 25000000, req: 125, stats: ["Gold Gain: 125", "Player XP: x2", "Essence: x25"] },
+        { name: "Treasury", chance: 125000000, req: 39, stats: ["Power: x8", "Rune Luck: x4", "Gold Chance: 5"] },
+        { name: "Gilded Arcane", chance: 2.75 * Math.pow(10, 15), req: 400, stats: ["Player XP: x8", "Lava: x10", "Rune Bulk: x3"] },
+        { name: "Kingsmark", chance: 900 * Math.pow(10, 30), req: 3700, stats: ["Power: x75", "Gold Gain: x10", "Rune Luck: x5"] },
+        { name: "Sol Sovereign", chance: 1 * Math.pow(10, 42), req: 198, stats: ["Gold Gain: x100", "Power: x15", "Ice: x5"] }
+    ],
+    magma: [
+        { name: "Charred", chance: 1, req: 250000, stats: ["Magma: 5"] },
+        { name: "Ignis", chance: 499900000, req: 5400000, stats: ["Magma: x15", "Damage: 10"] },
+        { name: "Cinder", chance: 24.49 * Math.pow(10, 9), req: 240, stats: ["Power: 3", "Gold Gain: 3", "Rune Luck: x1.5"] },
+        { name: "Pyric", chance: 2749 * Math.pow(10, 12), req: 563, stats: ["Essence: 45", "Magma: 25", "Rune Bulk: x8"] },
+        { name: "Searing", chance: 97.49 * Math.pow(10, 12), req: 448000000000, stats: ["Magma: x25", "Gold Gain: 12", "Rune Luck: x3"] },
+        { name: "Volcanic", chance: 49.9 * Math.pow(10, 15), req: 16400, stats: ["Power: x15", "Lava: x5", "Magma: x25"] },
+        { name: "Worldflare", chance: 9.999 * Math.pow(10, 24), req: 810000, stats: ["Plasma Points: x5", "Player XP: x5", "Magma: x10"] },
+        { name: "Infernal Sigil", chance: 124.9 * Math.pow(10, 39), req: 1530, stats: ["Power: x45", "Player XP: x10", "Rune Luck: x9"] }
+    ],
+    plasma: [
+        { name: "Plasmatic", chance: 1, req: 5000000000, stats: ["Plasma Points: 5", "Power: 15"] },
+        { name: "Arclight", chance: 999.9 * Math.pow(10, 15), req: 32200, stats: ["Plasma Points: 25", "Player XP: x4", "Rune Bulk: x4"] },
+        { name: "Voltaris", chance: 12.49 * Math.pow(10, 18), req: 62500, stats: ["Lava: x3", "Magma: x25", "Rune Luck: x5"] },
+        { name: "Aetherion", chance: 4.599 * Math.pow(10, 21), req: 2490, stats: ["Power: x12", "Plasma Points: x5", "Rune Luck: x7"] },
+        { name: "Astralis", chance: 2.499 * Math.pow(10, 27), req: 16800, stats: ["Plasma Points: x9", "Lava: x5", "Rune Luck: x3"] },
+        { name: "Ecliptor", chance: 499.9 * Math.pow(10, 42), req: 1950000, stats: ["Plasma Points: x10", "Lava: x6", "Aura Luck: x3"] }
+    ],
+    snow: [
+        { name: "Snowfall", chance: 1, req: 4500, stats: ["Snowflakes: x10", "Snowflakes: x15", "Player XP: x10"] },
+        { name: "Frostbite", chance: 99.99 * Math.pow(10, 30), req: 36900, stats: ["Power: x40", "Player XP: x10", "Snowflakes: x7"] },
+        { name: "Icebound", chance: 1.999 * Math.pow(10, 39), req: 2, stats: ["Player XP: x2", "Snowflakes: x5", "Plasma Points: x9"] },
+        { name: "Glacial", chance: 49.99 * Math.pow(10, 42), req: 3910000, stats: ["Power: x50", "Magma: x45", "Rune Luck: x3"] },
+        { name: "Winters Wrath", chance: 999.9 * Math.pow(10, 45), req: 16800000, stats: ["Power: x25", "Snowflakes: x5", "Rune Bulk: x5"] },
+        { name: "Absolute Zero", chance: 12.49 * Math.pow(10, 51), req: 1560000000, stats: ["Player XP: x50", "Power: x25", "Ice: x15"] },
+        { name: "Eternal Whiteout", chance: 29.99 * Math.pow(10, 60), req: 659000, stats: ["Power: x25", "Ice: x6", "Aura Luck: x2"] }
+    ]
+};
+
+let activeWorld = "starter";
+
+// INITIALIZE DROPDOWNS
 const bulkSelect = document.getElementById('bulk-suffix');
 const luckSelect = document.getElementById('luck-suffix');
 
 suffixes.forEach((suffix, index) => {
-    // Option für Bulk
-    let optBulk = document.createElement('option');
-    optBulk.value = index;
-    optBulk.textContent = suffix === "" ? "none" : suffix;
-    bulkSelect.appendChild(optBulk);
-
-    // Option für Luck
-    let optLuck = document.createElement('option');
-    optLuck.value = index;
-    optLuck.textContent = suffix === "" ? "none" : suffix;
-    luckSelect.appendChild(optLuck);
+    let opt = document.createElement('option'); opt.value = index; opt.textContent = suffix === "" ? "none" : suffix;
+    bulkSelect.appendChild(opt);
+    let opt2 = opt.cloneNode(true);
+    luckSelect.appendChild(opt2);
 });
+bulkSelect.value = 0; luckSelect.value = 0; 
 
-// Standardmäßig "B" für Bulk auswählen (Index 3 in der Liste: "", "K", "M", "B")
-bulkSelect.value = 3; 
-
-// Formatiert Zahlen für die Anzeige (z.B. 1500 -> "1.5 K")
 function formatNumber(num) {
     if (num === 0) return "0";
     if (!isFinite(num)) return "∞";
     if (num < 1000) return num.toFixed(1).replace('.0', '');
-
     const i = Math.floor(Math.log10(num) / 3);
-    
-    if (i >= suffixes.length) {
-        return num.toExponential(2);
-    }
-
+    if (i >= suffixes.length) return num.toExponential(2);
     const formatted = (num / Math.pow(10, i * 3)).toFixed(2);
     return formatted.replace('.00', '') + " " + suffixes[i];
 }
 
-// Rechnet den Wert des Inputs mal den Multiplikator des Dropdowns
-function getFullValue(inputEl, selectEl) {
-    let rawVal = inputEl.value.replace(',', '.');
-    let num = parseFloat(rawVal) || 0;
-    let suffixIndex = parseInt(selectEl.value) || 0;
+function formatTime(seconds) {
+    if (seconds === 0) return "Instant";
+    if (!isFinite(seconds) || seconds > 3.15 * Math.pow(10, 16)) return "Infinite / Too Long";
     
+    const years = Math.floor(seconds / (3600 * 24 * 365));
+    seconds %= (3600 * 24 * 365);
+    const days = Math.floor(seconds / (3600 * 24));
+    seconds %= (3600 * 24);
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+
+    let res = [];
+    if (years > 0) return `${formatNumber(years)}y`;
+    if (days > 0) res.push(`${days}d`);
+    if (hours > 0) res.push(`${hours}h`);
+    if (minutes > 0) res.push(`${minutes}m`);
+    if (secs > 0 || res.length === 0) res.push(`${secs}s`);
+    return res.join(' ');
+}
+
+function getFullValue(inputEl, selectEl) {
+    let num = parseFloat(inputEl.value.replace(',', '.')) || 0;
+    let suffixIndex = parseInt(selectEl.value) || 0;
     return num * Math.pow(10, suffixIndex * 3);
 }
 
-const inputSpeed = document.getElementById('speed');
-const inputBulkVal = document.getElementById('bulk-val');
-const inputLuckVal = document.getElementById('luck-val');
-const inputClones = document.getElementById('clones');
-const liveDisplay = document.getElementById('live-display');
-
 function updateCalculations() {
-    const rawSpeed = parseFloat(inputSpeed.value.replace(',', '.')) || 0;
+    const rawSpeed = parseFloat(document.getElementById('speed').value.replace(',', '.')) || 0;
+    const liveDisplay = document.getElementById('live-display');
 
-    // Validierung für Rune Speed
-    if (rawSpeed < 0.08) {
-        inputSpeed.classList.add('error-input');
+    if (rawSpeed < 0.08 || rawSpeed > 1) {
+        document.getElementById('speed').classList.add('error-input');
         liveDisplay.classList.add('error-text');
-        liveDisplay.innerHTML = "❌ Error: Min Speed is 0.08!";
-        return;
-    } else if (rawSpeed > 1) {
-        inputSpeed.classList.add('error-input');
-        liveDisplay.classList.add('error-text');
-        liveDisplay.innerHTML = "❌ Error: Max Speed is 1!";
+        liveDisplay.innerHTML = "❌ Error: Speed must be between 0.08 and 1.0!";
         return;
     } else {
-        inputSpeed.classList.remove('error-input');
+        document.getElementById('speed').classList.remove('error-input');
         liveDisplay.classList.remove('error-text');
     }
 
-    // Werte berechnen unter Einbeziehung der Dropdowns
-    const speed = rawSpeed;
-    const bulk = getFullValue(inputBulkVal, bulkSelect);
-    const clones = parseFloat(inputClones.value.replace(',', '.')) || 0;
+    const bulk = getFullValue(document.getElementById('bulk-val'), bulkSelect);
+    const luck = getFullValue(document.getElementById('luck-val'), luckSelect);
+    const clones = parseFloat(document.getElementById('clones').value.replace(',', '.')) || 0;
 
-    // Formel: (1 / Speed) * Bulk * Clones
-    const rollsPerSecond = (1 / speed) * bulk ;
-    const formattedRolls = formatNumber(rollsPerSecond);
+    // Rolls / sec (Main metric)
+    const rollsPerSecond = (1 / rawSpeed) * bulk;
+    liveDisplay.innerHTML = `🔓 Opened: <span>${formatNumber(rollsPerSecond)}</span> / sec`;
+
+    // Render cards live
+    const container = document.getElementById('cards-container');
+    container.innerHTML = "";
     
-    liveDisplay.innerHTML = `🔓 You Open: <span>${formattedRolls}</span> / sec`;
+    document.getElementById('current-world-title').textContent = `${activeWorld.toUpperCase()} RUNES LISTING`;
+
+    runeData[activeWorld].forEach(subRune => {
+        // High luck cap logic: Chance can never drop below 1-to-1 drop chance
+        let effectiveChance = subRune.chance / (luck === 0 ? 1 : luck);
+        if (effectiveChance < 1) effectiveChance = 1;
+
+        // Formula: Base needed rolls = (Chance * Required) / RollsPerSecond
+        // Final calculation: Divide by Clones at the very end
+        let baseRollsNeeded = (effectiveChance * subRune.req) / (rollsPerSecond || 1);
+        let secondsToMax = baseRollsNeeded / (clones || 1);
+
+        const card = document.createElement('div');
+        card.className = 'rune-card';
+        
+        let statsHTML = subRune.stats.map(s => `<li>${s}</li>`).join('');
+
+        card.innerHTML = `
+            <div class="card-header">
+                <div>
+                    <div class="card-world-type">${activeWorld} rune</div>
+                    <div class="card-title">${subRune.name}</div>
+                </div>
+            </div>
+            <div class="card-chance">1 in ${formatNumber(subRune.chance)}</div>
+            <div class="card-divider"></div>
+            <div class="card-avg-box">
+                <div class="card-avg-label">AVG TIME TO MAX:</div>
+                <div class="card-avg-time">${formatTime(secondsToMax)}</div>
+            </div>
+            <div class="card-divider"></div>
+            <ul class="card-stats-list">
+                ${statsHTML}
+            </ul>
+        `;
+        container.appendChild(card);
+    });
 }
 
-// Event-Listener auf alle Inputs und Dropdowns legen
-[inputSpeed, inputBulkVal, bulkSelect, inputLuckVal, luckSelect, inputClones].forEach(element => {
+// TOP BAR TAB SWITCHING LOGIC
+document.querySelectorAll('.rune-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.rune-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeWorld = tab.getAttribute('data-rune');
+        updateCalculations();
+    });
+});
+
+// EVENT LISTENERS FOR SETTINGS
+[document.getElementById('speed'), document.getElementById('bulk-val'), bulkSelect, document.getElementById('luck-val'), luckSelect, document.getElementById('clones')].forEach(element => {
     element.addEventListener('input', updateCalculations);
 });
 
-// Erster Render-Aufruf
 updateCalculations();
 </script>
 
