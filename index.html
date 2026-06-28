@@ -25,7 +25,7 @@ body {
 
 /* LEFT PANEL */
 .left {
-    width: 320px;
+    width: 340px;
     background: #151922;
     padding: 20px;
     border-right: 1px solid #2a2f3a;
@@ -39,7 +39,7 @@ body {
     overflow-y: auto;
 }
 
-/* INPUTS */
+/* INPUTS & LABELS */
 label {
     display: block;
     margin-top: 16px;
@@ -48,20 +48,34 @@ label {
     color: #94a3b8;
 }
 
-input {
-    width: 100%;
+/* Flexbox Row for Input + Dropdown */
+.input-group {
+    display: flex;
+    gap: 8px;
     margin-top: 6px;
-    padding: 10px 12px;
+}
+
+input, select {
     background: #0f1115;
     border: 1px solid #2a2f3a;
     color: #ffffff;
     border-radius: 6px;
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    transition: border-color 0.2s, background-color 0.2s;
+    padding: 10px 12px;
+    transition: border-color 0.2s;
 }
 
-input:focus {
+input {
+    flex: 1; /* Eingabefeld nimmt den restlichen Platz */
+}
+
+select {
+    width: 90px; /* Feste Breite für das Suffix-Dropdown */
+    cursor: pointer;
+}
+
+input:focus, select:focus {
     outline: none;
     border-color: #3b82f6;
 }
@@ -71,12 +85,12 @@ input.error-input {
     background: #1c1214;
 }
 
-/* MAKES THE LIVE DISPLAY MUCH LARGER */
+/* LIVE STATS DIRECTLY UNDER CLONE */
 .live-counter {
     margin-top: 24px;
-    padding: 12px 0;
+    padding-top: 16px;
     border-top: 1px solid #2a2f3a;
-    font-size: 18px; /* Größere Schrift */
+    font-size: 18px;
     color: #3b82f6;
     font-weight: 700;
 }
@@ -89,7 +103,7 @@ input.error-input {
 .live-counter span {
     color: #ffffff;
     font-family: 'Courier New', monospace;
-    font-size: 22px; /* Zahlen extra groß */
+    font-size: 22px;
 }
 
 /* TEXT */
@@ -118,16 +132,28 @@ h2 {
         <h2>⚡ Rune Settings</h2>
 
         <label>⏱ Rune Speed</label>
-        <input type="text" id="speed" value="1">
+        <div class="input-group">
+            <input type="text" id="speed" value="0.1">
+        </div>
 
         <label>📦 Rune Bulk</label>
-        <input type="text" id="bulk" value="100B">
+        <div class="input-group">
+            <input type="text" id="bulk-val" value="100">
+            <select id="bulk-suffix">
+                </select>
+        </div>
 
         <label>🍀 Rune Luck</label>
-        <input type="text" id="luck" value="100">
+        <div class="input-group">
+            <input type="text" id="luck-val" value="1">
+            <select id="luck-suffix">
+                </select>
+        </div>
 
         <label>👥 Clone</label>
-        <input type="text" id="clones" value="1">
+        <div class="input-group">
+            <input type="text" id="clones" value="1">
+        </div>
         
         <div class="live-counter" id="live-display">
             🔓 Opened: <span id="live-rolls-speed">0</span> / sec
@@ -143,7 +169,7 @@ h2 {
 </div>
 
 <script>
-// Suffixe für die Konvertierung in beide Richtungen
+// Deine exakte Suffix-Liste
 const suffixes = [
     "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
     "Dc", "Ud", "Dd", "Td", "Qua", "Qui", "Sxd", "Spd", "Ocd", "Nd", 
@@ -151,7 +177,28 @@ const suffixes = [
     "Tr", "Utg", "Dtg", "Tt", "Qatg", "Qitg", "Sxtg", "Sptg", "Octg", "Notg"
 ];
 
-// Funktion: Macht aus großen Zahlen formatierte Strings (z.B. 100000 -> "100 K")
+// Dropdowns beim Start automatisch mit den Suffixen füllen
+const bulkSelect = document.getElementById('bulk-suffix');
+const luckSelect = document.getElementById('luck-suffix');
+
+suffixes.forEach((suffix, index) => {
+    // Option für Bulk
+    let optBulk = document.createElement('option');
+    optBulk.value = index;
+    optBulk.textContent = suffix === "" ? "none" : suffix;
+    bulkSelect.appendChild(optBulk);
+
+    // Option für Luck
+    let optLuck = document.createElement('option');
+    optLuck.value = index;
+    optLuck.textContent = suffix === "" ? "none" : suffix;
+    luckSelect.appendChild(optLuck);
+});
+
+// Standardmäßig "B" für Bulk auswählen (Index 3 in der Liste: "", "K", "M", "B")
+bulkSelect.value = 3; 
+
+// Formatiert Zahlen für die Anzeige (z.B. 1500 -> "1.5 K")
 function formatNumber(num) {
     if (num === 0) return "0";
     if (!isFinite(num)) return "∞";
@@ -167,46 +214,25 @@ function formatNumber(num) {
     return formatted.replace('.00', '') + " " + suffixes[i];
 }
 
-// NEU: Funktion, die "100B" wieder in eine echte mathematische Zahl umwandelt!
-function parseInputValue(val) {
-    if (!val) return 0;
+// Rechnet den Wert des Inputs mal den Multiplikator des Dropdowns
+function getFullValue(inputEl, selectEl) {
+    let rawVal = inputEl.value.replace(',', '.');
+    let num = parseFloat(rawVal) || 0;
+    let suffixIndex = parseInt(selectEl.value) || 0;
     
-    // Bereinigen (Komma zu Punkt, Leerzeichen weg)
-    let str = val.toString().replace(',', '.').trim();
-    
-    // Extrahiere die reine Zahl am Anfang
-    let numPart = parseFloat(str) || 0;
-    
-    // Suche nach einem Suffix am Ende des Strings
-    let suffixPart = str.replace(/[0-9.]/g, '').trim();
-    
-    if (suffixPart) {
-        // Finde den Multiplikator-Index aus deiner Suffix-Liste
-        const index = suffixes.findIndex(s => s.toLowerCase() === suffixPart.toLowerCase());
-        if (index > 0) {
-            numPart = numPart * Math.pow(10, index * 3);
-        }
-    }
-    
-    return numPart;
+    return num * Math.pow(10, suffixIndex * 3);
 }
 
 const inputSpeed = document.getElementById('speed');
-const inputBulk = document.getElementById('bulk');
-const inputLuck = document.getElementById('luck');
+const inputBulkVal = document.getElementById('bulk-val');
+const inputLuckVal = document.getElementById('luck-val');
 const inputClones = document.getElementById('clones');
 const liveDisplay = document.getElementById('live-display');
 
 function updateCalculations() {
-    // Nutzen jetzt den intelligenten Input-Parser für Idle-Mengen
-    const speed = parseInputValue(inputSpeed.value);
-    const bulk = parseInputValue(inputBulk.value);
-    const clones = parseInputValue(inputClones.value);
-
-    // Speed Constraints Validierung (0.08 - 1.0)
-    // Wir nehmen den rohen String-Wert für die Validierung, damit wir direkte Treffer landen
     const rawSpeed = parseFloat(inputSpeed.value.replace(',', '.')) || 0;
 
+    // Validierung für Rune Speed
     if (rawSpeed < 0.08) {
         inputSpeed.classList.add('error-input');
         liveDisplay.classList.add('error-text');
@@ -222,19 +248,24 @@ function updateCalculations() {
         liveDisplay.classList.remove('error-text');
     }
 
-    // Berechnung: (1 / Speed) * Bulk * Clones
+    // Werte berechnen unter Einbeziehung der Dropdowns
+    const speed = rawSpeed;
+    const bulk = getFullValue(inputBulkVal, bulkSelect);
+    const clones = parseFloat(inputClones.value.replace(',', '.')) || 0;
+
+    // Formel: (1 / Speed) * Bulk * Clones
     const rollsPerSecond = (1 / speed) * bulk * clones;
     const formattedRolls = formatNumber(rollsPerSecond);
     
-    // Ausgabe im vergrößerten UI-Element
     liveDisplay.innerHTML = `🔓 Opened: <span>${formattedRolls}</span> / sec`;
 }
 
-[inputSpeed, inputBulk, inputLuck, inputClones].forEach(input => {
-    input.addEventListener('input', updateCalculations);
+// Event-Listener auf alle Inputs und Dropdowns legen
+[inputSpeed, inputBulkVal, bulkSelect, inputLuckVal, luckSelect, inputClones].forEach(element => {
+    element.addEventListener('input', updateCalculations);
 });
 
-// Initialer Startlauf
+// Erster Render-Aufruf
 updateCalculations();
 </script>
 
