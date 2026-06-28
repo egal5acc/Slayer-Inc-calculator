@@ -254,7 +254,7 @@ function updateCalculations() {
     const clones = parseFloat(inputClones.value.replace(',', '.')) || 0;
 
     // Formel: (1 / Speed) * Bulk * Clones
-    const rollsPerSecond = (1 / speed) * bulk * clones;
+    const rollsPerSecond = (1 / speed) * bulk ;
     const formattedRolls = formatNumber(rollsPerSecond);
     
     liveDisplay.innerHTML = `🔓 You Open: <span>${formattedRolls}</span> / sec`;
