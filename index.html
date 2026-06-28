@@ -60,7 +60,7 @@ body {
 .rune-tab[data-rune="magma"]:hover, .rune-tab[data-rune="magma"].active { border-color: #ef4444; color: #ef4444; background: #241417; }
 .rune-tab[data-rune="plasma"]:hover, .rune-tab[data-rune="plasma"].active { border-color: #06b6d4; color: #06b6d4; background: #0f232a; }
 .rune-tab[data-rune="snow"]:hover, .rune-tab[data-rune="snow"].active { border-color: #93c5fd; color: #93c5fd; background: #172033; }
-.rune-tab[data-rune="ice"]:hover, .rune-tab[data-rune="ice"].active { border-color: #38bdf8; color: #38bdf8; background: #0c1e2e; }
+.rune-tab[data-rune="icey"]:hover, .rune-tab[data-rune="icey"].active { border-color: #38bdf8; color: #38bdf8; background: #0c1e2e; }
 
 /* BOTTOM SPLIT LAYOUT */
 .main-container {
@@ -227,7 +227,7 @@ input.error-input { border-color: #ef4444; background: #1c1214; }
     <div class="rune-tab" data-rune="magma">Magma Rune</div>
     <div class="rune-tab" data-rune="plasma">Plasma Rune</div>
     <div class="rune-tab" data-rune="snow">Snow Rune</div>
-    <div class="rune-tab" data-rune="ice">Ice Rune</div>
+    <div class="rune-tab" data-rune="icey">Icey Rune</div>
 </div>
 
 <div class="main-container">
@@ -280,40 +280,40 @@ const suffixes = [
 // DATA BASE FROM THE EXCEL SHEETS
 const runeData = {
     starter: [
-        { name: "Common", chance: 1.21, req: 364, stats: ["Power: 10"] },
-        { name: "Uncommon", chance: 6.06, req: 313, stats: ["Power: 25", "Player XP: 5"] },
-        { name: "Rare", chance: 100.20, req: 625, stats: ["Essence: 125"] },
-        { name: "Epic", chance: 1250, req: 250, stats: ["Power: 300", "Gold Gain: +1.25"] },
-        { name: "Legendary", chance: 60110, req: 78, stats: ["Power: +1.25K", "Player XP: 15", "Rune Bulk: x1.5"] },
-        { name: "Mythical", chance: 606100, req: 10000, stats: ["Power: +100K", "Gold Gain: x4", "Rune Luck: x2.25"] },
+        { name: "Common", chance: 1.21, req: 364, stats: ["Power: +x10"] },
+        { name: "Uncommon", chance: 6.06, req: 313, stats: ["Power: +x25", "Player XP: +x5"] },
+        { name: "Rare", chance: 100.20, req: 625, stats: ["Essence: +x125"] },
+        { name: "Epic", chance: 1250, req: 250, stats: ["Power: +x300", "Gold Gain: +x1.25"] },
+        { name: "Legendary", chance: 60110, req: 78, stats: ["Power: +x1.25K", "Player XP: +x15", "Rune Bulk: x1.5"] },
+        { name: "Mythical", chance: 606100, req: 10000, stats: ["Power: +x100K", "Gold Gain: x4", "Rune Luck: x2.25"] },
         { name: "Secret", chance: 2594000, req: 34, stats: ["Power: x10", "Rune Clone: x2"] },
         { name: "Unknown", chance: 10010000000, req: 232, stats: ["Damage: x10", "Essence: x100", "Rune Luck: x2.25"] },
         { name: "Celestial", chance: 400.7 * Math.pow(10, 21), req: 1500, stats: ["Player XP: x10", "Gold Gain: x12", "Rune Bulk: x5"] },
         { name: "Ancient", chance: 40.07 * Math.pow(10, 36), req: 6560, stats: ["Plasma Points: x10", "Spirit Orbs: x75", "Rune Luck: x3"] }
     ],
     golden: [
-        { name: "Shiny", chance: 1, req: 5720, stats: ["Gold Gain: 8", "Player XP: 10"] },
-        { name: "Regal", chance: 100000, req: 186, stats: ["Gold Gain: 25"] },
-        { name: "Auric", chance: 2000000, req: 12900, stats: ["Damage: 25", "Essence: 20", "Rune Luck: x2.5"] },
-        { name: "Imperial", chance: 25000000, req: 125, stats: ["Gold Gain: 125", "Player XP: x2", "Essence: x25"] },
-        { name: "Treasury", chance: 125000000, req: 39, stats: ["Power: x8", "Rune Luck: x4", "Gold Chance: 5"] },
+        { name: "Shiny", chance: 1, req: 5720, stats: ["Gold Gain: +x8", "Player XP: +x10"] },
+        { name: "Regal", chance: 100000, req: 186, stats: ["Gold Gain: +x25"] },
+        { name: "Auric", chance: 2000000, req: 12900, stats: ["Damage: +x25", "Essence: +x20", "Rune Luck: x2.5"] },
+        { name: "Imperial", chance: 25000000, req: 125, stats: ["Gold Gain: +x125", "Player XP: x2", "Essence: x25"] },
+        { name: "Treasury", chance: 125000000, req: 39, stats: ["Power: x8", "Rune Luck: x4", "Gold Chance: +5%"] },
         { name: "Gilded Arcane", chance: 2.75 * Math.pow(10, 15), req: 400, stats: ["Player XP: x8", "Lava: x10", "Rune Bulk: x3"] },
         { name: "Kingsmark", chance: 900 * Math.pow(10, 30), req: 3700, stats: ["Power: x75", "Gold Gain: x10", "Rune Luck: x5"] },
         { name: "Sol Sovereign", chance: 1 * Math.pow(10, 42), req: 198, stats: ["Gold Gain: x100", "Power: x15", "Ice: x5"] }
     ],
     magma: [
-        { name: "Charred", chance: 1, req: 250000, stats: ["Magma: 5"] },
-        { name: "Ignis", chance: 499900000, req: 5400000, stats: ["Magma: x15", "Damage: 10"] },
-        { name: "Cinder", chance: 24.49 * Math.pow(10, 9), req: 240, stats: ["Power: 3", "Gold Gain: 3", "Rune Luck: x1.5"] },
-        { name: "Pyric", chance: 2749 * Math.pow(10, 12), req: 563, stats: ["Essence: 45", "Magma: 25", "Rune Bulk: x8"] },
-        { name: "Searing", chance: 97.49 * Math.pow(10, 12), req: 448000000000, stats: ["Magma: x25", "Gold Gain: 12", "Rune Luck: x3"] },
+        { name: "Charred", chance: 1, req: 250000, stats: ["Magma: +x5"] },
+        { name: "Ignis", chance: 499900000, req: 5400000, stats: ["Magma: x15", "Damage: +x10"] },
+        { name: "Cinder", chance: 24.49 * Math.pow(10, 9), req: 240, stats: ["Power: +x3", "Gold Gain: +x3", "Rune Luck: x1.5"] },
+        { name: "Pyric", chance: 2749 * Math.pow(10, 12), req: 563, stats: ["Essence: +x45", "Magma: +x25", "Rune Bulk: x8"] },
+        { name: "Searing", chance: 97.49 * Math.pow(10, 12), req: 448000000000, stats: ["Magma: x25", "Gold Gain: +x12", "Rune Luck: x3"] },
         { name: "Volcanic", chance: 49.9 * Math.pow(10, 15), req: 16400, stats: ["Power: x15", "Lava: x5", "Magma: x25"] },
         { name: "Worldflare", chance: 9.999 * Math.pow(10, 24), req: 810000, stats: ["Plasma Points: x5", "Player XP: x5", "Magma: x10"] },
         { name: "Infernal Sigil", chance: 124.9 * Math.pow(10, 39), req: 1530, stats: ["Power: x45", "Player XP: x10", "Rune Luck: x9"] }
     ],
     plasma: [
-        { name: "Plasmatic", chance: 1, req: 5000000000, stats: ["Plasma Points: 5", "Power: 15"] },
-        { name: "Arclight", chance: 999.9 * Math.pow(10, 15), req: 32200, stats: ["Plasma Points: 25", "Player XP: x4", "Rune Bulk: x4"] },
+        { name: "Plasmatic", chance: 1, req: 5000000000, stats: ["Plasma Points: +x5", "Power: +x15"] },
+        { name: "Arclight", chance: 999.9 * Math.pow(10, 15), req: 32200, stats: ["Plasma Points: +x25", "Player XP: x4", "Rune Bulk: x4"] },
         { name: "Voltaris", chance: 12.49 * Math.pow(10, 18), req: 62500, stats: ["Lava: x3", "Magma: x25", "Rune Luck: x5"] },
         { name: "Aetherion", chance: 4.599 * Math.pow(10, 21), req: 2490, stats: ["Power: x12", "Plasma Points: x5", "Rune Luck: x7"] },
         { name: "Astralis", chance: 2.499 * Math.pow(10, 27), req: 16800, stats: ["Plasma Points: x9", "Lava: x5", "Rune Luck: x3"] },
