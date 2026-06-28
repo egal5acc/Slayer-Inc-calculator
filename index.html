@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rune System</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0f1115;
+    color: white;
+}
+
+/* MAIN LAYOUT */
+.wrapper {
+    display: flex;
+    height: 100vh;
+}
+
+/* LEFT PANEL */
+.left {
+    width: 320px;
+    background: #151922;
+    padding: 15px;
+    border-right: 1px solid #2a2f3a;
+    overflow-y: auto;
+}
+
+/* RIGHT PANEL */
+.right {
+    flex: 1;
+    padding: 20px;
+}
+
+/* INPUTS */
+label {
+    display: block;
+    margin-top: 12px;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+input, textarea {
+    width: 100%;
+    margin-top: 5px;
+    padding: 10px;
+    background: #0f1115;
+    border: 1px solid #2a2f3a;
+    color: white;
+    border-radius: 6px;
+    font-family: monospace;
+}
+
+/* TEXT */
+h2 {
+    margin-top: 0;
+}
+
+.small {
+    font-size: 12px;
+    opacity: 0.6;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <!-- LEFT SIDE -->
+    <div class="left">
+
+        <h2>⚡ Rune Settings</h2>
+        <p class="small">Configure your entire rune system here.</p>
+
+        <!-- SPEED -->
+        <label>⏱ Rune Speed</label>
+        <p class="small">Time per roll (e.g. 0.1 = very fast rolls)</p>
+        <input type="number" value="0.1">
+
+        <!-- BULK -->
+        <label>📦 Rune Bulk</label>
+        <p class="small">How many attempts per roll happen</p>
+        <input type="number" value="100">
+
+        <!-- LUCK -->
+        <label>🍀 Rune Luck</label>
+        <p class="small">Multiplier for better drop chances</p>
+        <input type="number" value="1">
+
+        <!-- CLONES -->
+        <label>👥 Clone</label>
+        <p class="small">Number of parallel farmers</p>
+        <input type="number" value="1">
+
+        <!-- ARRAY INPUT -->
+        <label>🔢 Number Array Input</label>
+        <p class="small">
+            Example: 1,5,10,25,100<br>
+            Used later for scaling / progression systems
+        </p>
+        <textarea rows="4" placeholder="e.g. 1,5,10,25,100"></textarea>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right">
+        <h2>📊 Output Panel</h2>
+        <p class="small">
+            Rune results, calculations, and future rune cards will appear here.
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>
