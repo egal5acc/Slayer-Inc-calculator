@@ -74,6 +74,19 @@
     input { flex: 1; min-width: 0; }
     select { cursor: pointer; }
 
+    /* SYSTEM ERROR STYLE */
+    .error-box {
+        background: #2a1414;
+        border: 1px solid var(--c-mythical);
+        color: #ff8888;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 15px;
+        display: none;
+    }
+
     .global-stats {
         margin-top: 15px;
         padding-top: 15px;
@@ -184,7 +197,11 @@
                 <input type="number" id="clone" value="3">
             </div>
         </div>
-        <div class="global-stats">
+        
+        <!-- SYSTEM ERROR WARNING BOX -->
+        <div id="error-box" class="error-box">⚠️ SYSTEM ERROR: Rune Speed must be between 0.08s and 1.00s!</div>
+
+        <div class="global-stats" id="global-stats-bar">
             <div>Rolls/sec: <span id="out-rolls">0</span></div>
             <div>Runes/sec: <span id="out-runs">0</span></div>
         </div>
@@ -306,12 +323,10 @@ const DATA = {
 
 let currentTab = "Starter";
 
-// --- POPULATE DROPDOWNS ---
 function initDropdowns() {
     const bSuf = document.getElementById("bulk-suf");
     const lSuf = document.getElementById("luck-suf");
-    
-    const reversedSuffixes = [...SUFFIXES].reverse(); // None up to Notg
+    const reversedSuffixes = [...SUFFIXES].reverse();
     
     reversedSuffixes.forEach(x => {
         const op1 = document.createElement("option");
@@ -346,10 +361,24 @@ function getMultiplier(suffixStr) {
 }
 
 function calculate() {
-    const speed = parseFloat(document.getElementById("speed").value) || 0.1;
+    const speed = parseFloat(document.getElementById("speed").value) || 0;
     const clone = parseFloat(document.getElementById("clone").value) || 1;
+    
+    const errBox = document.getElementById("error-box");
+    const statsBar = document.getElementById("global-stats-bar");
+    const cardsCont = document.getElementById("cards-container");
 
-    // Build values using separate dropdown multipliers
+    // --- CHECK FOR RUNESPEED ERROR ---
+    if (speed < 0.08 || speed > 1.00) {
+        errBox.style.display = "block";
+        statsBar.style.display = "none";
+        cardsCont.innerHTML = `<div style="text-align:center; color:var(--c-mythical); width:100%; grid-column: 1/-1; padding: 40px; font-weight:bold;">CALCULATION HALTED DUE TO SPEED ERROR</div>`;
+        return;
+    } else {
+        errBox.style.display = "none";
+        statsBar.style.display = "flex";
+    }
+
     const bulkNum = parseFloat(document.getElementById("bulk-num").value) || 0;
     const bulkMult = getMultiplier(document.getElementById("bulk-suf").value);
     const bulk = bulkNum * bulkMult;
@@ -358,26 +387,20 @@ function calculate() {
     const luckMult = getMultiplier(document.getElementById("luck-suf").value);
     const luck = luckNum * luckMult;
 
-    // FIXED FORMULA: Runes/sec strictly = rollsPerSec * bulk (Clone excluded globally!)
     const rollsPerSec = speed > 0 ? (1 / speed) : 0;
     const runsPerSec = rollsPerSec * bulk;
 
     document.getElementById("out-rolls").innerText = formatNum(rollsPerSec);
     document.getElementById("out-runs").innerText = formatNum(runsPerSec);
 
-    const cont = document.getElementById("cards-container");
     let html = "";
 
     DATA[currentTab].forEach(rune => {
         const baseDenom = parseStringValue(rune.c);
         const currentDenom = baseDenom / luck;
-        
-        // NEW N/A LOGIC: If high luck makes the denominator smaller than 1, it's pushed out / unattainable
         const isNA = (currentDenom < 1 || runsPerSec <= 0);
 
-        // CLONE MULTIPLIED AT THE VERY END ONLY per specific card output calculation
         const expectedDropsPerSec = isNA ? 0 : (runsPerSec * (1 / currentDenom) * clone);
-        
         const chanceStr = isNA ? "N/A" : `1 in ${formatNum(currentDenom)}`;
         const expStr = isNA ? "N/A" : formatNum(expectedDropsPerSec);
 
@@ -411,7 +434,7 @@ function calculate() {
         html += `</div>`;
     });
 
-    cont.innerHTML = html;
+    cardsCont.innerHTML = html;
 }
 
 // --- INIT & AUTOSAVE ---
@@ -420,13 +443,13 @@ initDropdowns();
 const inputIds = ['speed', 'bulk-num', 'bulk-suf', 'luck-num', 'luck-suf', 'clone'];
 inputIds.forEach(id => {
     const el = document.getElementById(id);
-    if(localStorage.getItem('slayer_v2_'+id)) el.value = localStorage.getItem('slayer_v2_'+id);
+    if(localStorage.getItem('slayer_v3_'+id)) el.value = localStorage.getItem('slayer_v3_'+id);
     el.addEventListener('input', () => {
-        localStorage.setItem('slayer_v2_'+id, el.value);
+        localStorage.setItem('slayer_v3_'+id, el.value);
         calculate();
     });
     el.addEventListener('change', () => {
-        localStorage.setItem('slayer_v2_'+id, el.value);
+        localStorage.setItem('slayer_v3_'+id, el.value);
         calculate();
     });
 });
