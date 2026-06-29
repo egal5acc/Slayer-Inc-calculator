@@ -174,6 +174,25 @@
 <div class="container">
     <div class="panel">
         <h1>Slayer Inc Rune Calculator</h1>
+
+        <div class="input-group">
+            <label>Current Level</label>
+            <input type="number" id="level-start" value="1">
+        </div>
+
+        <div class="input-group">
+            <label>Target Level</label>
+            <input type="number" id="level-end" value="100">
+        </div>
+<div class="input-group">
+    <label>XP Needed</label>
+    <input type="text" id="xp-output" readonly value="0">
+</div>
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Rune Speed (sec)</label>
+                <input type="number" id="speed" value="0.1" step="0.01">
+            </div>
         <div class="input-grid">
             <div class="input-group">
                 <label>Rune Speed (sec)</label>
@@ -264,7 +283,7 @@ function formatTime(sec) {
 }
 
 const DATA = {
-    XpCalculator: [
+    XPCalculatorc: [
         { r: "Common", c: "1.00", t: "common", s: [{n: "Power", v: "+5", nd: "100"}] },
       ],
     Starter: [
@@ -365,6 +384,12 @@ function getMultiplier(suffixStr) {
 function calculate() {
     const speed = parseFloat(document.getElementById("speed").value) || 0;
     const clone = parseFloat(document.getElementById("clone").value) || 1;
+    const currentLevel = parseInt(document.getElementById("level-start").value) || 0;
+const targetLevel = parseInt(document.getElementById("level-end").value) || 0;
+
+const xpNeeded = 500 * (Math.pow(1.2, targetLevel) - Math.pow(1.2, currentLevel));
+
+document.getElementById("xp-output").value = formatNum(xpNeeded);
     
     const errBox = document.getElementById("error-box");
     const statsBar = document.getElementById("global-stats-bar");
