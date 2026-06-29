@@ -48,14 +48,19 @@
 
     .input-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 15px;
     }
 
     .input-group { display: flex; flex-direction: column; gap: 5px; }
     .input-group label { font-size: 13px; color: var(--text-muted); font-weight: bold; }
     
-    input {
+    .input-row {
+        display: flex;
+        gap: 5px;
+    }
+
+    input, select {
         background: var(--bg-main);
         border: 1px solid var(--border);
         color: #fff;
@@ -65,7 +70,9 @@
         outline: none;
         transition: border-color 0.2s;
     }
-    input:focus { border-color: var(--c-rare); }
+    input:focus, select:focus { border-color: var(--c-rare); }
+    input { flex: 1; min-width: 0; }
+    select { cursor: pointer; }
 
     .global-stats {
         margin-top: 15px;
@@ -137,7 +144,6 @@
     .stat-details span { color: #fff; font-weight: bold; }
     .time-highlight { color: var(--c-rare) !important; }
 
-    /* Rarities */
     .uncommon { color: var(--c-uncommon); border-left-color: var(--c-uncommon); }
     .rare { color: var(--c-rare); border-left-color: var(--c-rare); }
     .epic { color: var(--c-epic); border-left-color: var(--c-epic); }
@@ -161,15 +167,21 @@
             </div>
             <div class="input-group">
                 <label>Rune Bulk</label>
-                <input type="text" id="bulk" value="100">
+                <div class="input-row">
+                    <input type="number" id="bulk-num" value="100">
+                    <select id="bulk-suf"></select>
+                </div>
             </div>
             <div class="input-group">
                 <label>Rune Luck</label>
-                <input type="text" id="luck" value="2.5">
+                <div class="input-row">
+                    <input type="number" id="luck-num" value="2.5" step="0.1">
+                    <select id="luck-suf"></select>
+                </div>
             </div>
             <div class="input-group">
                 <label>Rune Clone</label>
-                <input type="text" id="clone" value="3">
+                <input type="number" id="clone" value="3">
             </div>
         </div>
         <div class="global-stats">
@@ -185,25 +197,29 @@
 </div>
 
 <script>
-// --- PARSER LOGIC ---
+// --- ALL REQUIRED SUFFIXES ---
 const SUFFIXES = [
-    {v: 1e63, s: 'Vg'}, {v: 1e60, s: 'Nd'}, {v: 1e57, s: 'Ocd'}, {v: 1e54, s: 'Spd'},
-    {v: 1e51, s: 'Sxd'}, {v: 1e48, s: 'Qui'}, {v: 1e45, s: 'Qua'}, {v: 1e42, s: 'Td'},
-    {v: 1e39, s: 'Dd'}, {v: 1e36, s: 'Ud'}, {v: 1e33, s: 'Dc'}, {v: 1e30, s: 'N'},
-    {v: 1e27, s: 'Oc'}, {v: 1e24, s: 'Sp'}, {v: 1e21, s: 'Sx'}, {v: 1e18, s: 'Qi'},
-    {v: 1e15, s: 'Qa'}, {v: 1e12, s: 'T'}, {v: 1e9, s: 'B'}, {v: 1e6, s: 'M'}, {v: 1e3, s: 'K'}
+    {v: 1e117, s: 'Notg'}, {v: 1e114, s: 'Octg'}, {v: 1e111, s: 'Sptg'}, {v: 1e108, s: 'Sxtg'},
+    {v: 1e105, s: 'Qitg'}, {v: 1e102, s: 'Qatg'}, {v: 1e99,  s: 'Tt'},   {v: 1e96,  s: 'Dtg'},
+    {v: 1e93,  s: 'Utg'},  {v: 1e90,  s: 'Tr'},   {v: 1e87,  s: 'Novg'}, {v: 1e84,  s: 'Ocvg'},
+    {v: 1e81,  s: 'Spvg'}, {v: 1e78,  s: 'Sxvg'}, {v: 1e75,  s: 'Qavg'}, {v: 1e72,  s: 'Tvg'},
+    {v: 1e69,  s: 'Dvg'},  {v: 1e66,  s: 'Uvg'},  {v: 1e63,  s: 'Vg'},   {v: 1e60,  s: 'Nd'},
+    {v: 1e57,  s: 'Ocd'},  {v: 1e54,  s: 'Spd'},  {v: 1e51,  s: 'Sxd'},  {v: 1e48,  s: 'Qui'},
+    {v: 1e45,  s: 'Qua'},  {v: 1e42,  s: 'Td'},   {v: 1e39,  s: 'Dd'},   {v: 1e36,  s: 'Ud'},
+    {v: 1e33,  s: 'Dc'},   {v: 1e30,  s: 'N'},    {v: 1e27,  s: 'Oc'},   {v: 1e24,  s: 'Sp'},
+    {v: 1e21,  s: 'Sx'},   {v: 1e18,  s: 'Qi'},   {v: 1e15,  s: 'Qa'},   {v: 1e12,  s: 'T'},
+    {v: 1e9,   s: 'B'},    {v: 1e6,   s: 'M'},    {v: 1e3,   s: 'K'},    {v: 1,     s: 'None'}
 ];
 
-function parseNum(str) {
+function parseStringValue(str) {
     if(!str) return 0;
     str = String(str).toLowerCase().replace(/,/g, '').trim();
-    if(str === '1nd') return 1e60; // Edgecase fallback
     const match = str.match(/^([0-9.]+)([a-z]*)$/);
     if (!match) return parseFloat(str) || 0;
     let val = parseFloat(match[1]);
     let suf = match[2];
     if (suf) {
-        if(suf === 'de') suf = 'dc'; // Fix for 'de' typo in prompt
+        if(suf === 'de') suf = 'dc';
         const found = SUFFIXES.find(x => x.s.toLowerCase() === suf);
         if (found) val *= found.v;
     }
@@ -211,10 +227,10 @@ function parseNum(str) {
 }
 
 function formatNum(num) {
-    if (!isFinite(num)) return "0";
+    if (!isFinite(num) || isNaN(num) || num <= 0) return "0";
     if (num < 1000) return Number.isInteger(num) ? num.toString() : num.toFixed(2);
     for (let i = 0; i < SUFFIXES.length; i++) {
-        if (num >= SUFFIXES[i].v) {
+        if (SUFFIXES[i].s !== 'None' && num >= SUFFIXES[i].v) {
             return (num / SUFFIXES[i].v).toFixed(2) + SUFFIXES[i].s;
         }
     }
@@ -222,7 +238,7 @@ function formatNum(num) {
 }
 
 function formatTime(sec) {
-    if (!isFinite(sec) || sec <= 0) return "Infinity";
+    if (!isFinite(sec) || isNaN(sec) || sec <= 0) return "N/A";
     if (sec < 60) return sec.toFixed(1) + "s";
     if (sec < 3600) return Math.floor(sec/60) + "m " + Math.floor(sec%60) + "s";
     if (sec < 86400) return Math.floor(sec/3600) + "h " + Math.floor((sec%3600)/60) + "m";
@@ -290,7 +306,27 @@ const DATA = {
 
 let currentTab = "Starter";
 
-// --- RENDER LOGIC ---
+// --- POPULATE DROPDOWNS ---
+function initDropdowns() {
+    const bSuf = document.getElementById("bulk-suf");
+    const lSuf = document.getElementById("luck-suf");
+    
+    const reversedSuffixes = [...SUFFIXES].reverse(); // None up to Notg
+    
+    reversedSuffixes.forEach(x => {
+        const op1 = document.createElement("option");
+        op1.value = x.s; op1.innerText = x.s;
+        bSuf.appendChild(op1);
+        
+        const op2 = document.createElement("option");
+        op2.value = x.s; op2.innerText = x.s;
+        lSuf.appendChild(op2);
+    });
+    
+    bSuf.value = "None";
+    lSuf.value = "None";
+}
+
 function renderTabs() {
     const cont = document.getElementById("tabs-container");
     cont.innerHTML = Object.keys(DATA).map(tab => 
@@ -304,39 +340,58 @@ function setTab(tab) {
     calculate();
 }
 
-function calculate() {
-    // Get Inputs
-    const speed = parseFloat(document.getElementById("speed").value) || 0.1;
-    const bulk = parseNum(document.getElementById("bulk").value) || 1;
-    const luck = parseNum(document.getElementById("luck").value) || 1;
-    const clone = parseNum(document.getElementById("clone").value) || 1;
+function getMultiplier(suffixStr) {
+    const found = SUFFIXES.find(x => x.s === suffixStr);
+    return found ? found.v : 1;
+}
 
-    // Base Math
+function calculate() {
+    const speed = parseFloat(document.getElementById("speed").value) || 0.1;
+    const clone = parseFloat(document.getElementById("clone").value) || 1;
+
+    // Build values using separate dropdown multipliers
+    const bulkNum = parseFloat(document.getElementById("bulk-num").value) || 0;
+    const bulkMult = getMultiplier(document.getElementById("bulk-suf").value);
+    const bulk = bulkNum * bulkMult;
+
+    const luckNum = parseFloat(document.getElementById("luck-num").value) || 0;
+    const luckMult = getMultiplier(document.getElementById("luck-suf").value);
+    const luck = luckNum * luckMult;
+
+    // FIXED FORMULA: Runes/sec strictly = rollsPerSec * bulk (Clone excluded globally!)
     const rollsPerSec = speed > 0 ? (1 / speed) : 0;
-    const runsPerSec = rollsPerSec * bulk * clone;
+    const runsPerSec = rollsPerSec * bulk;
 
     document.getElementById("out-rolls").innerText = formatNum(rollsPerSec);
     document.getElementById("out-runs").innerText = formatNum(runsPerSec);
 
-    // Cards Math
     const cont = document.getElementById("cards-container");
     let html = "";
 
     DATA[currentTab].forEach(rune => {
-        const baseDenom = parseNum(rune.c);
+        const baseDenom = parseStringValue(rune.c);
         const currentDenom = baseDenom / luck;
-        const expectedDropsPerSec = runsPerSec * (1 / currentDenom);
+        
+        // NEW N/A LOGIC: If high luck makes the denominator smaller than 1, it's pushed out / unattainable
+        const isNA = (currentDenom < 1 || runsPerSec <= 0);
+
+        // CLONE MULTIPLIED AT THE VERY END ONLY per specific card output calculation
+        const expectedDropsPerSec = isNA ? 0 : (runsPerSec * (1 / currentDenom) * clone);
+        
+        const chanceStr = isNA ? "N/A" : `1 in ${formatNum(currentDenom)}`;
+        const expStr = isNA ? "N/A" : formatNum(expectedDropsPerSec);
 
         html += `
         <div class="card">
             <div class="card-header">
                 <div class="card-title ${rune.t}">${rune.r}</div>
-                <div class="card-chance">Base: 1 in ${formatNum(baseDenom)} | Current: 1 in ${formatNum(currentDenom)}</div>
+                <div class="card-chance">Base: 1 in ${formatNum(baseDenom)} | Current: ${chanceStr}</div>
             </div>`;
 
         rune.s.forEach(stat => {
-            const needVal = parseNum(stat.nd);
-            const timeSec = expectedDropsPerSec > 0 ? (needVal / expectedDropsPerSec) : Infinity;
+            const needVal = parseStringValue(stat.nd);
+            const timeSec = (!isNA && expectedDropsPerSec > 0) ? (needVal / expectedDropsPerSec) : Infinity;
+            const timeStr = (isNA || timeSec === Infinity) ? "N/A" : formatTime(timeSec);
             
             html += `
             <div class="stat-box ${rune.t}">
@@ -345,9 +400,9 @@ function calculate() {
                 </div>
                 <div class="stat-details">
                     <div>Need: <span>${formatNum(needVal)}</span></div>
-                    <div>Exp/sec: <span>${formatNum(expectedDropsPerSec)}</span></div>
+                    <div>Exp/sec: <span>${expStr}</span></div>
                     <div style="grid-column: span 2; margin-top:5px;">
-                        Time to Max: <span class="time-highlight">${formatTime(timeSec)}</span>
+                        Time to Max: <span class="time-highlight">${timeStr}</span>
                     </div>
                 </div>
             </div>`;
@@ -360,12 +415,18 @@ function calculate() {
 }
 
 // --- INIT & AUTOSAVE ---
-const inputs = ['speed', 'bulk', 'luck', 'clone'];
-inputs.forEach(id => {
+initDropdowns();
+
+const inputIds = ['speed', 'bulk-num', 'bulk-suf', 'luck-num', 'luck-suf', 'clone'];
+inputIds.forEach(id => {
     const el = document.getElementById(id);
-    if(localStorage.getItem('slayer_'+id)) el.value = localStorage.getItem('slayer_'+id);
+    if(localStorage.getItem('slayer_v2_'+id)) el.value = localStorage.getItem('slayer_v2_'+id);
     el.addEventListener('input', () => {
-        localStorage.setItem('slayer_'+id, el.value);
+        localStorage.setItem('slayer_v2_'+id, el.value);
+        calculate();
+    });
+    el.addEventListener('change', () => {
+        localStorage.setItem('slayer_v2_'+id, el.value);
         calculate();
     });
 });
