@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Slayer Inc Calculator</title>
+<title>Slayer Inc Rune & XP Calculator</title>
 <style>
     :root {
         --bg-main: #0b0d10;
@@ -14,16 +14,16 @@
         --text-main: #e0e6ed;
         --text-muted: #8b949e;
         
-        --c-common: #a0a0a0;
-        --c-uncommon: #4caf50;
-        --c-rare: #2196f3;
-        --c-epic: #9c27b0;
-        --c-legendary: #ff9800;
-        --c-mythical: #f44336;
-        --c-secret: #ffd700;
-        --c-unknown: #8a2be2;
-        --c-celestial: #00ffff;
-        --c-ancient: #fffacd;
+        /* Farbzuweisungen basierend auf den Screenshots */
+        --c-common: #d1d5db;       /* Icy / White / Silver */
+        --c-uncommon: #4caf50;     /* Green (Treasury) */
+        --c-rare: #2196f3;         /* Blue (Imperial, Plasmatic, Glacial) */
+        --c-epic: #9c27b0;         /* Purple (Regal, Voltaris, InfernalSigil, Aetherion) */
+        --c-legendary: #ff9800;    /* Orange/Amber (Auric, Ignis, Volcanic, Worldflare, Ecliptor) */
+        --c-mythical: #f44336;     /* Red (Kingsmark, Pyric) */
+        --c-secret: #ffd700;       /* Gold/Yellow (SolSovereign, Searing) */
+        --c-celestial: #00ffff;    /* Cyan/Mint (GildedArcane, Arclight, Astralis, Frostbite, Icebound) */
+        --c-unknown: #6366f1;      /* Indigo/Dark Blue (WintersWrath, Cryo) */
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,10 +56,7 @@
     .input-group { display: flex; flex-direction: column; gap: 5px; }
     .input-group label { font-size: 13px; color: var(--text-muted); font-weight: bold; }
     
-    .input-row {
-        display: flex;
-        gap: 5px;
-    }
+    .input-row { display: flex; gap: 5px; }
 
     input, select {
         background: var(--bg-main);
@@ -73,7 +70,6 @@
     }
     input:focus, select:focus { border-color: var(--c-rare); }
     input { flex: 1; min-width: 0; }
-    select { cursor: pointer; }
 
     .error-box {
         background: #2a1414;
@@ -103,6 +99,7 @@
         gap: 10px;
         overflow-x: auto;
         padding-bottom: 5px;
+        margin-bottom: 15px;
     }
 
     .tab-btn {
@@ -114,14 +111,14 @@
         cursor: pointer;
         font-weight: bold;
         transition: 0.2s;
+        white-space: nowrap;
     }
     .tab-btn.active { background: var(--border); color: #fff; }
 
     .cards-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 20px;
-        margin-top: 20px;
     }
 
     .card {
@@ -135,7 +132,7 @@
     }
 
     .card-header { text-align: center; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .card-title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+    .card-title { font-size: 19px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; }
     .card-chance { font-size: 12px; color: var(--text-muted); }
 
     .stat-box {
@@ -149,35 +146,46 @@
     
     .stat-details {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 5px;
-        font-size: 12px;
+        font-size: 13px;
         color: var(--text-muted);
     }
     .stat-details span { color: #fff; font-weight: bold; }
-    .time-highlight { color: var(--c-rare) !important; }
+    .time-highlight { color: #ffeb3b !important; font-weight: bold; }
 
+    /* Dynamische Farbklassen */
     .common { color: var(--c-common); border-left-color: var(--c-common); }
     .uncommon { color: var(--c-uncommon); border-left-color: var(--c-uncommon); }
     .rare { color: var(--c-rare); border-left-color: var(--c-rare); }
     .epic { color: var(--c-epic); border-left-color: var(--c-epic); }
     .legendary { color: var(--c-legendary); border-left-color: var(--c-legendary); }
     .mythical { color: var(--c-mythical); border-left-color: var(--c-mythical); }
-    .secret { color: var(--c-secret); border-left-color: var(--c-secret); text-shadow: 0 0 5px rgba(255,215,0,0.3); }
-    .unknown { color: var(--c-unknown); border-left-color: var(--c-unknown); text-shadow: 0 0 5px rgba(138,43,226,0.3); }
-    .celestial { color: var(--c-celestial); border-left-color: var(--c-celestial); text-shadow: 0 0 5px rgba(0,255,255,0.3); }
-    .ancient { color: var(--c-ancient); border-left-color: var(--c-ancient); text-shadow: 0 0 5px rgba(255,250,205,0.3); }
+    .secret { color: var(--c-secret); border-left-color: var(--c-secret); }
+    .celestial { color: var(--c-celestial); border-left-color: var(--c-celestial); }
+    .unknown { color: var(--c-unknown); border-left-color: var(--c-unknown); }
+
+    .title-common { color: var(--c-common); }
+    .title-uncommon { color: var(--c-uncommon); }
+    .title-rare { color: var(--c-rare); }
+    .title-epic { color: var(--c-epic); }
+    .title-legendary { color: var(--c-legendary); }
+    .title-mythical { color: var(--c-mythical); }
+    .title-secret { color: var(--c-secret); }
+    .title-celestial { color: var(--c-celestial); }
+    .title-unknown { color: var(--c-unknown); }
 </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- INPUT PANEL -->
     <div class="panel">
-        <h1>Slayer Inc Rune Calculator</h1>
+        <h1>Slayer Inc Rune & XP Calculator</h1>
         <div class="input-grid">
             <div class="input-group">
                 <label>Rune Speed (sec)</label>
-                <input type="number" id="speed" value="0.1" step="0.01">
+                <input type="number" id="speed" value="0.08" step="0.01">
             </div>
             <div class="input-group">
                 <label>Rune Bulk</label>
@@ -189,31 +197,58 @@
             <div class="input-group">
                 <label>Rune Luck</label>
                 <div class="input-row">
-                    <input type="number" id="luck-num" value="2.5" step="0.1">
+                    <input type="number" id="luck-num" value="1.0">
                     <select id="luck-suf"></select>
                 </div>
             </div>
             <div class="input-group">
                 <label>Rune Clone</label>
-                <input type="number" id="clone" value="3">
+                <input type="number" id="clone" value="1" min="1">
             </div>
         </div>
         
-        <div id="error-box" class="error-box">⚠️ SYSTEM ERROR: Rune Speed must be between 0.08s and 1.00s!</div>
+        <div id="error-box" class="error-box">⚠️ SYSTEM ERROR: Rune Speed darf nicht unter 0.08s liegen!</div>
 
-        <div class="global-stats" id="global-stats-bar">
-            <div>Rolls/sec: <span id="out-rolls">0</span></div>
-            <div>Runes/sec: <span id="out-runs">0</span></div>
+        <div class="global-stats">
+            <div>Rolls/Sekunde: <span id="out-rolls">0</span></div>
+            <div>Runen/Sekunde: <span id="out-runs">0</span></div>
         </div>
     </div>
 
+    <!-- MAIN INTERFACE -->
     <div class="panel">
         <div class="tabs" id="tabs-container"></div>
         <div class="cards-grid" id="cards-container"></div>
+        
+        <!-- XP CALCULATOR CARD -->
+        <div class="card" style="max-width: 500px; margin: 30px auto 0 auto; border: 1px solid var(--c-rare);">
+            <div class="card-header">
+                <div class="card-title title-rare">XP Calculator</div>
+                <div class="card-chance">Berechnet die benötigten Erfahrungspunkte live</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                <div class="input-group">
+                    <label>Current Level (S)</label>
+                    <input type="number" id="xp-current-lvl" value="1" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Wanted Level (E)</label>
+                    <input type="number" id="xp-wanted-lvl" value="100" min="0">
+                </div>
+                <div class="stat-box rare">
+                    <div class="stat-head">Berechnungsergebnis:</div>
+                    <div class="stat-details" style="font-size: 15px;">
+                        <div>Benötigte Gesamtsumme:</div>
+                        <div class="time-highlight" id="xp-needed-out">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+// Suffix-System bis hoch zu Notg
 const SUFFIXES = [
     {v: 1e117, s: 'Notg'}, {v: 1e114, s: 'Octg'}, {v: 1e111, s: 'Sptg'}, {v: 1e108, s: 'Sxtg'},
     {v: 1e105, s: 'Qitg'}, {v: 1e102, s: 'Qatg'}, {v: 1e99,  s: 'Tt'},   {v: 1e96,  s: 'Dtg'},
@@ -226,6 +261,52 @@ const SUFFIXES = [
     {v: 1e21,  s: 'Sx'},   {v: 1e18,  s: 'Qi'},   {v: 1e15,  s: 'Qa'},   {v: 1e12,  s: 'T'},
     {v: 1e9,   s: 'B'},    {v: 1e6,   s: 'M'},    {v: 1e3,   s: 'K'},    {v: 1,     s: 'None'}
 ];
+
+// Komplette Runen-Datenbank basierend auf allen 5 Screenshots sortiert nach Elementen
+const DATA = {
+    "Golden Runes": [
+        { r: "Shiny", c: "6.185Ud", t: "common", s: "+8 Golden Points, +x10 Xp" },
+        { r: "Regal", c: "61.85N", t: "epic", s: "+x25 Golden Points" },
+        { r: "Auric", c: "3.092N", t: "legendary", s: "+x25 Damage, +x20 Essence, x2.5 RuneLuck" },
+        { r: "Imperial", c: "247.4Oc", t: "rare", s: "+x125 Golden Points, x2 Xp, x25 Essence" },
+        { r: "Treasury", c: "49.48Oc", t: "uncommon", s: "x8 Power, x4 RuneLuck, +5% Gold Chance" },
+        { r: "GildedArcane", c: "778.4Ud", t: "celestial", s: "x8 Xp, x10 Lava, x3 RuneBulk" },
+        { r: "Kingsmark", c: "201.6Ud", t: "mythical", s: "x75 Power" },
+        { r: "SolSovereign", c: "816", t: "secret", s: "x100 Golden Points" }
+    ],
+    "Fire Runes": [
+        { r: "Charred", c: "15.290Oc", t: "common", s: "+x5 Magma" },
+        { r: "Ignis", c: "152.9Qi", t: "legendary", s: "x15 Magma, +x10 Damage" },
+        { r: "Cinder", c: "3.138Qi", t: "common", s: "+x3 Power, +x3 Golden Points, x1.5 RuneLuck" },
+        { r: "Pyric", c: "123.4Qa", t: "mythical", s: "+x45 Essence, +x25 Magma, x8 RuneBulk" },
+        { r: "Searing", c: "852.5Qi", t: "secret", s: "x25 Magma, +x12 Golden Points, x3 RuneLuck" },
+        { r: "Volcanic", c: "38.21Sp", t: "legendary", s: "x15 Power, x5 Lava, x25 Magma" },
+        { r: "Worldflare", c: "42.27Sp", t: "legendary", s: "x5 Plasma" },
+        { r: "InfernalSigil", c: "24.93B", t: "epic", s: "x45 Power" }
+    ],
+    "Plasma Runes": [
+        { r: "Plasmatic", c: "2.049Sp", t: "rare", s: "+x5 Plasma, +x15 Power" },
+        { r: "Arclight", c: "52.46Sx", t: "celestial", s: "+x25 Plasma, x4 Xp, x4 RuneBulk" },
+        { r: "Voltaris", c: "12.71Sp", t: "epic", s: "x3 Lava, x25 Magma, x5 RuneLuck" },
+        { r: "Aetherion", c: "486.7Sp", t: "epic", s: "x12 Power, x5 Plasma, x7 RuneLuck" },
+        { r: "Astralis", c: "545.6Sx", t: "celestial", s: "x9 Plasma, x5 Lava, x3 RuneLuck" },
+        { r: "Ecliptor", c: "2.729M", t: "legendary", s: "x10 Plasma, x6 Lava, x3 Aura Luck" }
+    ],
+    "Ice Runes": [
+        { r: "Snowfall", c: "4.286Ud", t: "common", s: "x10 Snowflakes, x15 Snowflakes, x10 Xp" },
+        { r: "Frostbite", c: "942.1Dc", t: "celestial", s: "x40 Power, x10 Xp, x7 Snowflakes" },
+        { r: "Icebound", c: "47.10c", t: "celestial", s: "x2 XP, x5 Snowflakes, x9 Plasma" },
+        { r: "Glacial", c: "1.884Sp", t: "rare", s: "x50 Power, x45 Magma, x3 RuneLuck" },
+        { r: "WintersWrath", c: "94.21Qa", t: "unknown", s: "x25 Power, x5 RuneBulk" },
+        { r: "AbsoluteZero", c: "7.537T", t: "common", s: "x50 Xp, x25 Power, x15 Ice" },
+        { r: "Eternalwhiteout", c: "3.142M", t: "common", s: "x25 Power" },
+        { r: "Frost", c: "599.8Qi", t: "common", s: "x6.62 Power, x4 Ice, x10 Xp" },
+        { r: "Glacier", c: "1.758M", t: "common", s: "x100 Golden Points, x5 Ice, x10 Xp" },
+        { r: "Cryo", c: "0", t: "unknown", s: "Rarity Not Discovered" }
+    ]
+};
+
+let currentTab = Object.keys(DATA)[0];
 
 function parseStringValue(str) {
     if(!str) return 0;
@@ -247,7 +328,7 @@ function formatNum(num) {
     if (num < 1000) return Number.isInteger(num) ? num.toString() : num.toFixed(2);
     for (let i = 0; i < SUFFIXES.length; i++) {
         if (SUFFIXES[i].s !== 'None' && num >= SUFFIXES[i].v) {
-            return (num / SUFFIXES[i].v).toFixed(2) + SUFFIXES[i].s;
+            return (num / SUFFIXES[i].v).toFixed(2) + " " + SUFFIXES[i].s;
         }
     }
     return num.toFixed(2);
@@ -258,215 +339,123 @@ function formatTime(sec) {
     if (sec < 60) return sec.toFixed(1) + "s";
     if (sec < 3600) return Math.floor(sec/60) + "m " + Math.floor(sec%60) + "s";
     if (sec < 86400) return Math.floor(sec/3600) + "h " + Math.floor((sec%3600)/60) + "m";
-    if (sec < 2592000) return Math.floor(sec/86400) + "d " + Math.floor((sec%86400)/3600) + "h";
-    if (sec < 31536000) return Math.floor(sec/2592000) + "mo " + Math.floor((sec%2592000)/86400) + "d";
-    return Math.floor(sec/31536000) + "y " + Math.floor((sec%31536000)/2592000) + "mo";
+    return Math.floor(sec/86400) + "d " + Math.floor((sec%86400)/3600) + "h";
 }
 
-const DATA = {
-    Starter: [
-        { r: "Common", c: "1.00", t: "common", s: [{n: "Power", v: "+5", nd: "100"}] },
-        { r: "Uncommon", c: "6.06", t: "uncommon", s: [{n: "Power", v: "+25", nd: "313"}, {n: "Player XP", v: "+5", nd: "143"}] },
-        { r: "Rare", c: "100.20", t: "rare", s: [{n: "Essence", v: "+125", nd: "625"}] },
-        { r: "Epic", c: "1.252K", t: "epic", s: [{n: "Power", v: "+300", nd: "250"}, {n: "Gold Gain", v: "+1.25", nd: "25"}] },
-        { r: "Legendary", c: "60.11K", t: "legendary", s: [{n: "Power", v: "+1.25K", nd: "78"}, {n: "Player XP", v: "+15", nd: "45"}, {n: "Rune Bulk", v: "×1.5", nd: "5"}] },
-        { r: "Mythical", c: "606.1K", t: "mythical", s: [{n: "Power", v: "+100K", nd: "10K"}, {n: "Gold Gain", v: "×4", nd: "60"}, {n: "Rune Luck", v: "×2.25", nd: "9"}] },
-        { r: "Secret", c: "2.594M", t: "secret", s: [{n: "Power", v: "×10", nd: "34"}, {n: "Rune Clone", v: "×2", nd: "1"}] },
-        { r: "Unknown", c: "10.01B", t: "unknown", s: [{n: "Damage", v: "×10", nd: "232"}, {n: "Essence", v: "×100", nd: "95"}, {n: "Rune Luck", v: "×2.25", nd: "13"}] },
-        { r: "Celestial", c: "400.7Oc", t: "celestial", s: [{n: "Player XP", v: "×10", nd: "1.5K"}, {n: "Gold Gain", v: "×12", nd: "22K"}, {n: "Rune Bulk", v: "×5", nd: "8K"}] },
-        { r: "Ancient", c: "40.07Ud", t: "ancient", s: [{n: "Plasma Points", v: "×10", nd: "6.56K"}, {n: "Spirit Orbs", v: "×75", nd: "1.08M"}, {n: "Rune Luck", v: "×3", nd: "59"}] }
-    ],
-    Golden: [
-        { r: "Shiny", c: "1.00", t: "uncommon", s: [{n: "Gold Gain", v: "+8", nd: "5.72K"}, {n: "Player XP", v: "+10", nd: "57.7K"}] },
-        { r: "Regal", c: "100K", t: "rare", s: [{n: "Gold Gain", v: "+25", nd: "186"}] },
-        { r: "Auric", c: "2M", t: "epic", s: [{n: "Damage", v: "+25", nd: "12.9K"}, {n: "Essence", v: "+20", nd: "46.5"}, {n: "Rune Luck", v: "×2.5", nd: "15"}] },
-        { r: "Imperial", c: "25M", t: "legendary", s: [{n: "Gold Gain", v: "+125", nd: "125"}, {n: "Player XP", v: "×2", nd: "20"}, {n: "Essence", v: "×25", nd: "800"}] },
-        { r: "Treasury", c: "125M", t: "mythical", s: [{n: "Power", v: "×8", nd: "39"}, {n: "Rune Luck", v: "×4", nd: "29"}, {n: "Gold Chance", v: "+5", nd: "5"}] },
-        { r: "Gilded", c: "2.75Qa", t: "secret", s: [{n: "Arcane Player XP", v: "×8", nd: "400"}, {n: "Lava", v: "×10", nd: "15.8K"}, {n: "Rune Bulk", v: "×3", nd: "40"}] },
-        { r: "Kingsmark", c: "900N", t: "unknown", s: [{n: "Power", v: "×75", nd: "3.7K"}, {n: "Gold Gain", v: "×10", nd: "57"}, {n: "Rune Luck", v: "×5", nd: "4.1K"}] },
-        { r: "Sol Sovereign", c: "200Uvg", t: "celestial", s: [{n: "Gold Gain", v: "×100", nd: "198"}, {n: "Power", v: "×15", nd: "1.4K"}, {n: "Icey", v: "×5", nd: "20K"}] }
-    ],
-    Magma: [
-        { r: "Charred", c: "1.00", t: "uncommon", s: [{n: "Magma", v: "+5", nd: "250K"}] },
-        { r: "Ignis", c: "499.9M", t: "rare", s: [{n: "Magma", v: "×15", nd: "5.4M"}, {n: "Damage", v: "+10", nd: "10K"}] },
-        { r: "Cinder", c: "24.49B", t: "epic", s: [{n: "Power", v: "+3", nd: "240"}, {n: "Gold Gain", v: "+3", nd: "45"}, {n: "Rune Luck", v: "×1.5", nd: "17"}] },
-        { r: "Pyric", c: "2.749T", t: "legendary", s: [{n: "Essence", v: "+45", nd: "563"}, {n: "Magma", v: "+25", nd: "100K"}, {n: "Rune Bulk", v: "×8", nd: "175"}] },
-        { r: "Searing", c: "97.49T", t: "mythical", s: [{n: "Magma", v: "×25", nd: "448B"}, {n: "Gold Gain", v: "+12", nd: "60"}, {n: "Rune Luck", v: "×3", nd: "80"}] },
-        { r: "Volcanic", c: "49.9Qa", t: "secret", s: [{n: "Power", v: "×15", nd: "16.4K"}, {n: "Lava", v: "×5", nd: "537"}, {n: "Magma", v: "×25", nd: "322"}] },
-        { r: "Worldflare", c: "9.999Sp", t: "unknown", s: [{n: "Plasma Points", v: "×5", nd: "810K"}, {n: "Player XP", v: "×5", nd: "256"}, {n: "Magma", v: "×10", nd: "250"}] },
-        { r: "Infernal Sigil", c: "124.9Dd", t: "celestial", s: [{n: "Power", v: "×45", nd: "1.53K"}, {n: "Player XP", v: "×10", nd: "18K"}, {n: "Rune Luck", v: "×9", nd: "111"}] }
-    ],
-    Plasma: [
-        { r: "Plasmatic", c: "1.00", t: "uncommon", s: [{n: "Plasma Points", v: "+5", nd: "5B"}, {n: "Power", v: "+15", nd: "291B"}] },
-        { r: "Arclight", c: "999.9Qa", t: "rare", s: [{n: "Plasma Points", v: "+25", nd: "32.2K"}, {n: "Player XP", v: "×4", nd: "300"}, {n: "Rune Bulk", v: "×4", nd: "1M"}] },
-        { r: "Voltaris", c: "12.49Qi", t: "epic", s: [{n: "Lava", v: "×3", nd: "62.5K"}, {n: "Magma", v: "×25", nd: "2.4K"}, {n: "Rune Luck", v: "×5", nd: "1K"}] },
-        { r: "Aetherion", c: "4.599Sx", t: "legendary", s: [{n: "Power", v: "×12", nd: "2.49K"}, {n: "Plasma Points", v: "×5", nd: "20K"}, {n: "Rune Luck", v: "×7", nd: "60"}] },
-        { r: "Astralis", c: "2.499Oc", t: "mythical", s: [{n: "Plasma Points", v: "×9", nd: "16.8K"}, {n: "Lava", v: "×5", nd: "800"}, {n: "Rune Luck", v: "×3", nd: "80"}] },
-        { r: "Ecliptor", c: "499.9Td", t: "secret", s: [{n: "Plasma Points", v: "×10", nd: "1.95M"}, {n: "Lava", v: "×6", nd: "5K"}, {n: "Aura Luck", v: "×3", nd: "10K"}] }
-    ],
-    Snow: [
-        { r: "Snowfall", c: "1.00", t: "uncommon", s: [{n: "Snowflakes", v: "×10", nd: "4.5K"}, {n: "Snowflakes", v: "×15", nd: "233M"}, {n: "Player XP", v: "×10", nd: "3.8T"}] },
-        { r: "Frostbite", c: "99.99N", t: "rare", s: [{n: "Power", v: "×40", nd: "36.9K"}, {n: "Player XP", v: "×10", nd: "430M"}, {n: "Snowflakes", v: "×7", nd: "800"}] },
-        { r: "Icebound", c: "1.999Dd", t: "epic", s: [{n: "Player XP", v: "×2", nd: "2"}, {n: "Snowflakes", v: "×5", nd: "1.6K"}, {n: "Plasma Points", v: "×9", nd: "1.68M"}] },
-        { r: "Glacial", c: "49.99Td", t: "legendary", s: [{n: "Power", v: "×50", nd: "3.91M"}, {n: "Magma", v: "×45", nd: "169B"}, {n: "Rune Luck", v: "×3", nd: "34"}] },
-        { r: "Winters Wrath", c: "999.9Qui", t: "mythical", s: [{n: "Power", v: "×25", nd: "16.8M"}, {n: "Snowflakes", v: "×5", nd: "800"}, {n: "Rune Bulk", v: "×5", nd: "10K"}] },
-        { r: "Absolute Zero", c: "12.49Spd", t: "secret", s: [{n: "Player XP", v: "×50", nd: "1.56B"}, {n: "Power", v: "×25", nd: "16.83M"}, {n: "Icey", v: "×15", nd: "1.4K"}] },
-        { r: "Eternal Whiteout", c: "29.99Nd", t: "unknown", s: [{n: "Power", v: "×25", nd: "659K"}, {n: "Icey", v: "×6", nd: "243"}, {n: "Aura Luck", v: "×2", nd: "2.5K"}] }
-    ],
-    Icey: [
-        { r: "Frost", c: "1.00", t: "uncommon", s: [{n: "Power", v: "×10", nd: "1.953Dc"}, {n: "Icey", v: "×4", nd: "3Qa"}, {n: "Player XP", v: "×10", nd: "12.16Qi"}] },
-        { r: "Glacier", c: "3.99Qua", t: "rare", s: [{n: "Golden Points", v: "×100", nd: "1.485M"}, {n: "Icey", v: "×5", nd: "50.625K"}, {n: "Player Xp", v: "×10", nd: "9"}] },
-        { r: "Cryo", c: "84.99Ocd", t: "epic", s: [{n: "Power", v: "×35", nd: "24.6M"}, {n: "Icey", v: "×5", nd: "4.096K"}, {n: "Aura Luck", v: "×2", nd: "50K"}] }
-    ]
-};
-
-let currentTab = "Starter";
-
-function initDropdowns() {
-    const bSuf = document.getElementById("bulk-suf");
-    const lSuf = document.getElementById("luck-suf");
-    const reversedSuffixes = [...SUFFIXES].reverse();
-    
-    reversedSuffixes.forEach(x => {
-        const op1 = document.createElement("option");
-        op1.value = x.s; op1.innerText = x.s;
-        bSuf.appendChild(op1);
-        
-        const op2 = document.createElement("option");
-        op2.value = x.s; op2.innerText = x.s;
-        lSuf.appendChild(op2);
+// Initialisiert Suffix-Dropdowns
+function setupDropdowns() {
+    const selects = ['bulk-suf', 'luck-suf'];
+    selects.forEach(id => {
+        const el = document.getElementById(id);
+        el.innerHTML = '';
+        SUFFIXES.forEach(x => {
+            const opt = document.createElement('option');
+            opt.value = x.s;
+            opt.textContent = x.s;
+            if(id === 'luck-suf' && x.s === 'None') opt.selected = true;
+            if(id === 'bulk-suf' && x.s === 'None') opt.selected = true;
+            el.appendChild(opt);
+        });
     });
+}
+
+function updateCalculations() {
+    const speed = parseFloat(document.getElementById('speed').value) || 0.08;
     
-    bSuf.value = "None";
-    lSuf.value = "None";
+    if (speed < 0.08) {
+        document.getElementById('error-box').style.display = 'block';
+        return;
+    } else {
+        document.getElementById('error-box').style.display = 'none';
+    }
+
+    const bulkNum = parseFloat(document.getElementById('bulk-num').value) || 0;
+    const bulkSuf = document.getElementById('bulk-suf').value;
+    const bulk = parseStringValue(bulkNum + bulkSuf);
+
+    const luckNum = parseFloat(document.getElementById('luck-num').value) || 0;
+    const luckSuf = document.getElementById('luck-suf').value;
+    const luck = parseStringValue(luckNum + luckSuf);
+
+    const clone = parseFloat(document.getElementById('clone').value) || 1;
+
+    const rollsPerSec = 1 / speed;
+    const runesPerSec = rollsPerSec * bulk * clone;
+
+    document.getElementById('out-rolls').textContent = rollsPerSec.toFixed(2);
+    document.getElementById('out-runs').textContent = formatNum(runesPerSec);
+
+    // XP Formel Berechnung
+    const currentLvl = parseInt(document.getElementById('xp-current-lvl').value) || 0;
+    const wantedLvl = parseInt(document.getElementById('xp-wanted-lvl').value) || 0;
+    
+    let xpNeeded = 0;
+    if (wantedLvl > currentLvl) {
+        xpNeeded = 500 * (Math.pow(1.2, wantedLvl) - Math.pow(1.2, currentLvl));
+    }
+    document.getElementById('xp-needed-out').textContent = formatNum(xpNeeded);
+
+    renderCards(runesPerSec, luck);
 }
 
 function renderTabs() {
-    const cont = document.getElementById("tabs-container");
-    cont.innerHTML = Object.keys(DATA).map(tab => 
-        `<div class="tab-btn ${tab===currentTab?'active':''}" onclick="setTab('${tab}')">${tab}</div>`
-    ).join("");
+    const container = document.getElementById('tabs-container');
+    container.innerHTML = '';
+    Object.keys(DATA).forEach(key => {
+        const btn = document.createElement('button');
+        btn.className = `tab-btn ${key === currentTab ? 'active' : ''}`;
+        btn.textContent = key;
+        btn.onclick = () => {
+            currentTab = key;
+            renderTabs();
+            updateCalculations();
+        };
+        container.appendChild(btn);
+    });
 }
 
-function setTab(tab) {
-    currentTab = tab;
-    renderTabs();
-    calculate();
-}
+function renderCards(runesPerSec, luck) {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = '';
 
-function getMultiplier(suffixStr) {
-    const found = SUFFIXES.find(x => x.s === suffixStr);
-    return found ? found.v : 1;
-}
+    const runes = DATA[currentTab] || [];
+    runes.forEach(rune => {
+        const baseChance = parseStringValue(rune.c);
+        // Höheres Luck senkt die benötigte Chance-Schwelle
+        const actualChance = baseChance / luck; 
+        
+        const secondsNeeded = runesPerSec > 0 ? (actualChance / runesPerSec) : Infinity;
 
-function calculate() {
-    const speed = parseFloat(document.getElementById("speed").value) || 0;
-    const clone = parseFloat(document.getElementById("clone").value) || 1;
-    
-    const errBox = document.getElementById("error-box");
-    const statsBar = document.getElementById("global-stats-bar");
-    const cardsCont = document.getElementById("cards-container");
-
-    if (speed < 0.08 || speed > 1.00) {
-        errBox.style.display = "block";
-        statsBar.style.display = "none";
-        cardsCont.innerHTML = `<div style="text-align:center; color:var(--c-mythical); width:100%; grid-column: 1/-1; padding: 40px; font-weight:bold;">CALCULATION HALTED DUE TO SPEED ERROR</div>`;
-        return;
-    } else {
-        errBox.style.display = "none";
-        statsBar.style.display = "flex";
-    }
-
-    const bulkNum = parseFloat(document.getElementById("bulk-num").value) || 0;
-    const bulkMult = getMultiplier(document.getElementById("bulk-suf").value);
-    const bulk = bulkNum * bulkMult;
-
-    const luckNum = parseFloat(document.getElementById("luck-num").value) || 0;
-    const luckMult = getMultiplier(document.getElementById("luck-suf").value);
-    const luck = luckNum * luckMult;
-
-    const rollsPerSec = speed > 0 ? (1 / speed) : 0;
-    const runsPerSec = rollsPerSec * bulk;
-
-    document.getElementById("out-rolls").innerText = formatNum(rollsPerSec);
-    document.getElementById("out-runs").innerText = formatNum(runsPerSec);
-
-    let html = "";
-
-    DATA[currentTab].forEach(rune => {
-const baseDenom = parseStringValue(rune.c);
-const currentDenom = baseDenom / luck;
-
-const currentIndex = DATA[currentTab].indexOf(rune);
-const nextRune = DATA[currentTab][currentIndex + 1];
-
-let isNA = (runsPerSec <= 0);
-
-if (nextRune) {
-    const nextDenom = parseStringValue(nextRune.c) / luck;
-
-    // Hide this rune if the next tier has already reached 1/1
-    if (nextDenom <= 1) {
-        isNA = true;
-    }
-}
-
-const displayDenom = Math.max(currentDenom, 1);
-
-const expectedDropsPerSec = isNA ? 0 : (runsPerSec * (1 / displayDenom) * clone);
-const chanceStr = isNA ? "N/A" : `1 in ${formatNum(displayDenom)}`;
-const expStr = isNA ? "N/A" : formatNum(expectedDropsPerSec);
-        html += `
-        <div class="card">
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
             <div class="card-header">
-                <div class="card-title ${rune.t}">${rune.r}</div>
-                <div class="card-chance">Base: 1 in ${formatNum(baseDenom)} | Current: ${chanceStr}</div>
-            </div>`;
-
-        rune.s.forEach(stat => {
-            const needVal = parseStringValue(stat.nd);
-            const timeSec = (!isNA && expectedDropsPerSec > 0) ? (needVal / expectedDropsPerSec) : Infinity;
-            const timeStr = (isNA || timeSec === Infinity) ? "N/A" : formatTime(timeSec);
-            
-            html += `
+                <div class="card-title title-${rune.t}">${rune.r}</div>
+                <div class="card-chance">Basis-Chance: 1 / ${rune.c}</div>
+            </div>
             <div class="stat-box ${rune.t}">
-                <div class="stat-head">
-                    <span>${stat.n} <span class="stat-val">${stat.v}</span></span>
-                </div>
+                <div class="stat-head">Benötigte Zeit:</div>
                 <div class="stat-details">
-                    <div>Need: <span>${formatNum(needVal)}</span></div>
-                    <div>Exp/sec: <span>${expStr}</span></div>
-                    <div style="grid-column: span 2; margin-top:5px;">
-                        Time to Max: <span class="time-highlight">${timeStr}</span>
-                    </div>
+                    <div>Zeitspanne: <span class="time-highlight">${formatTime(secondsNeeded)}</span></div>
                 </div>
-            </div>`;
-        });
-
-        html += `</div>`;
+            </div>
+            <div style="font-size:12px; color: var(--text-muted); background:var(--bg-main); padding:8px; border-radius:6px;">
+                <strong style="color:#fff;">Effekte:</strong><br>${rune.s}
+            </div>
+        `;
+        container.appendChild(card);
     });
-
-    cardsCont.innerHTML = html;
 }
 
-initDropdowns();
-
-const inputIds = ['speed', 'bulk-num', 'bulk-suf', 'luck-num', 'luck-suf', 'clone'];
-inputIds.forEach(id => {
-    const el = document.getElementById(id);
-    if(localStorage.getItem('slayer_v3_'+id)) el.value = localStorage.getItem('slayer_v3_'+id);
-    el.addEventListener('input', () => {
-        localStorage.setItem('slayer_v3_'+id, el.value);
-        calculate();
-    });
-    el.addEventListener('change', () => {
-        localStorage.setItem('slayer_v3_'+id, el.value);
-        calculate();
-    });
+// Event Listeners registrieren
+document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', updateCalculations);
 });
 
+// Init
+setupDropdowns();
 renderTabs();
-calculate();
+updateCalculations();
 </script>
 </body>
 </html>
