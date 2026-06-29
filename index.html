@@ -394,14 +394,28 @@ function calculate() {
     let html = "";
 
     DATA[currentTab].forEach(rune => {
-        const baseDenom = parseStringValue(rune.c);
-        const currentDenom = baseDenom / luck;
-        const isNA = (currentDenom < 1 || runsPerSec <= 0);
+const baseDenom = parseStringValue(rune.c);
+const currentDenom = baseDenom / luck;
 
-        const expectedDropsPerSec = isNA ? 0 : (runsPerSec * (1 / currentDenom) * clone);
-        const chanceStr = isNA ? "N/A" : `1 in ${formatNum(currentDenom)}`;
-        const expStr = isNA ? "N/A" : formatNum(expectedDropsPerSec);
+const currentIndex = DATA[currentTab].indexOf(rune);
+const nextRune = DATA[currentTab][currentIndex + 1];
 
+let isNA = (runsPerSec <= 0);
+
+if (nextRune) {
+    const nextDenom = parseStringValue(nextRune.c) / luck;
+
+    // Hide this rune if the next tier has already reached 1/1
+    if (nextDenom <= 1) {
+        isNA = true;
+    }
+}
+
+const displayDenom = Math.max(currentDenom, 1);
+
+const expectedDropsPerSec = isNA ? 0 : (runsPerSec * (1 / displayDenom) * clone);
+const chanceStr = isNA ? "N/A" : `1 in ${formatNum(displayDenom)}`;
+const expStr = isNA ? "N/A" : formatNum(expectedDropsPerSec);
         html += `
         <div class="card">
             <div class="card-header">
